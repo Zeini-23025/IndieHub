@@ -1,0 +1,147 @@
+===============================================================================
+                   CAHIER DES CHARGES – GAME LAUNCHER
+                          React + Django
+===============================================================================
+
+
+1. PRÉSENTATION DU PROJET
+──────────────────────────────────────────────────────────────────────────────
+
+Créer une application web Game Launcher permettant à des développeurs 
+indépendants de proposer leurs jeux.
+
+Rôles utilisateurs : Administrateur | Développeur | Utilisateur
+
+Objectifs :
+  • Centraliser les jeux indépendants
+  • Promouvoir et soutenir les développeurs arabes et projets culturels
+  • Appliquer un système de validation garantissant le respect des règles 
+    culturelles, éthiques et religieuses
+  • Valider les jeux avant publication
+  • Permettre le téléchargement simple
+  • Interface moderne : React (frontend) + Django (backend)
+
+2. TYPES D'UTILISATEURS ET PERMISSIONS
+──────────────────────────────────────────────────────────────────────────────
+
+┌─ ADMINISTRATEUR ─────────────────────────────────────────────────────────────┐
+│  • Valide ou rejette les jeux                                                │
+│  • Teste les jeux                                                            │
+│  • Vérifie la conformité du contenu selon les règles définies                │
+│  • Gère les comptes développeurs                                             │
+│  • Gère les catégories/tags                                                  │
+│  • Supprime les jeux et comptes                                              │
+│  • Accède aux statistiques                                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ DÉVELOPPEUR ────────────────────────────────────────────────────────────────┐
+│  • Crée un compte développeur                                                │
+│  • Soumet un jeu (titre, description, screenshots, fichier)                  │
+│  • Consulte le statut du jeu (En attente | Validé | Rejeté)                 │
+│  • Peut corriger un jeu rejeté                                               │
+│  • Propose des jeux indépendants et/ou culturellement arabes                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ UTILISATEUR ────────────────────────────────────────────────────────────────┐
+│  • Télécharge les jeux sans compte                                           │
+│  • Recherche et filtre les jeux                                              │
+│  • Avec compte : bibliothèque personnelle + historique de téléchargements   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+3. FONCTIONNALITÉS
+──────────────────────────────────────────────────────────────────────────────
+
+Fonctionnalités principales :
+  • Parcourir les jeux
+  • Télécharger un jeu
+  • Recherche et filtres avancés
+  • Soumission des jeux par les développeurs
+  • Validation obligatoire par l'administrateur
+  • Bibliothèque utilisateur (jeux téléchargés)
+  • Mise en avant des jeux créés par des développeurs indépendants et arabes
+
+Workflow de Publication :
+  1. Soumission du jeu par le développeur
+  2. Statut "En attente" (mise en file d'attente)
+  3. Test et vérification par l'administrateur
+  4. Validation ou rejet
+  5. Publication publique ou notification de rejet
+
+4. ARCHITECTURE TECHNIQUE
+──────────────────────────────────────────────────────────────────────────────
+
+BACKEND – DJANGO
+───────────────
+Modèles de données :
+  • User
+  • Game
+  • Screenshot
+  • Category
+  • Library
+  • DownloadHistory
+
+API Endpoints :
+  • POST   /auth/login                      (Authentification)
+  • POST   /dev/games/create                (Création de jeu)
+  • GET    /games                           (Liste des jeux)
+  • GET    /games/{id}                      (Détails du jeu)
+  • POST   /admin/games/{id}/approve        (Approbation par admin)
+  • POST   /admin/games/{id}/reject         (Rejet par admin)
+
+FRONTEND – REACT
+────────────────
+Pages :
+  • Home                                    (Accueil)
+  • Browse                                  (Parcourir les jeux)
+  • Game Details                            (Détails d'un jeu)
+  • Download                                (Page de téléchargement)
+  • Login / Register                        (Authentification)
+  • Dev Dashboard                           (Tableau de bord développeur)
+  • Admin Dashboard                         (Tableau de bord administrateur)
+
+Composants réutilisables :
+  • GameCard                                (Carte de jeu)
+  • FilterPanel                             (Panneau de filtrage)
+  • ScreenshotGallery                       (Galerie de captures d'écran)
+  • UploadForm                              (Formulaire de soumission)
+  • LibraryList                             (Liste de la bibliothèque)
+
+5. CONTRAINTES TECHNIQUES
+──────────────────────────────────────────────────────────────────────────────
+
+  • Frontend             : React
+  • Backend              : Django + Django REST Framework (DRF)
+  • Base de données      : À définir (PostgreSQL recommandé)
+  • Stockage des fichiers: Local ou cloud (AWS S3, etc.)
+  • Authentification     : JWT (JSON Web Tokens)
+  • Support multilingue  : Arabe et Anglais
+  • Design responsif     : Mobile, Tablette, Desktop
+
+6. EXIGENCES NON FONCTIONNELLES
+──────────────────────────────────────────────────────────────────────────────
+
+  • Performance rapide et fluide
+  • Code propre et bien structuré
+  • Sécurité forte (validation des données, protection contre les menaces)
+  • Documentation technique complète
+  • Accessibilité (WCAG compliance)
+
+7. LIVRABLES
+──────────────────────────────────────────────────────────────────────────────
+
+  • Code source complet (Frontend + Backend)
+  • Configuration et migration de la base de données
+  • Documentation technique (architecture, installation, API)
+  • Manuel utilisateur et guide d'administration
+  • Présentation finale et démonstration
+
+8. PLANNING (10 SPRINTS)
+──────────────────────────────────────────────────────────────────────────────
+
+  Sprint 1-2    : Configuration initiale et authentification
+  Sprint 3-4    : Gestion des jeux et système d'upload
+  Sprint 5-6    : Tableau de bord administrateur
+  Sprint 7-8    : Interface utilisateur et expérience
+  Sprint 9-10   : Tests complets et déploiement
+
+===============================================================================
