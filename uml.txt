@@ -1,0 +1,239 @@
+===============================================================================
+                      DIAGRAMME UML – GAME LAUNCHER
+                   Modèle des Données (Entity-Relationship)
+===============================================================================
+
+
+1. CLASSES PRINCIPALES
+──────────────────────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────┐
+│            USER (Utilisateur)        │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • username (string, unique)         │
+│  • email (string, unique)            │
+│  • password (string, hashed)         │
+│  • role (admin|developer|user)       │
+│  • date_joined (datetime)            │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + login()                           │
+│  + logout()                          │
+│  + updateProfile()                   │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│            GAME (Jeu)                │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • title (string)                    │
+│  • description (text)                │
+│  • file_path (string)                │
+│  • status (pending|approved|rejected)│
+│  • created_at (datetime)             │
+│  • updated_at (datetime)             │
+│  • developer_id (FK → User)          │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + submit()                          │
+│  + update()                          │
+│  + getDetails()                      │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│         SCREENSHOT (Capture d'écran) │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • image_path (string)               │
+│  • game_id (FK → Game)               │
+│  • uploaded_at (datetime)            │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + addScreenshot()                   │
+│  + deleteScreenshot()                │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│         CATEGORY (Catégorie)         │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • name (string, unique)             │
+│  • description (text)                │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + assignCategory()                  │
+│  + getGames()                        │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│       LIBRARY ENTRY (Entrée Biblio.) │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • user_id (FK → User)               │
+│  • game_id (FK → Game)               │
+│  • added_at (datetime)               │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + addToLibrary()                    │
+│  + removeFromLibrary()               │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│       DOWNLOAD HISTORY (Historique)  │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • game_id (FK → Game)               │
+│  • user_id (FK → User, nullable)     │
+│  • timestamp (datetime)              │
+│  • device_info (string)              │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + recordDownload()                  │
+│  + getDownloadStats()                │
+└──────────────────────────────────────┘
+
+
+2. CLASSES HÉRITÉES
+──────────────────────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────┐
+│         ADMIN (hérité de User)       │
+├──────────────────────────────────────┤
+│ Méthodes supplémentaires:            │
+│  + approveGame(game_id)              │
+│  + rejectGame(game_id, reason)       │
+│  + deleteGame(game_id)               │
+│  + deleteUser(user_id)               │
+│  + viewStatistics()                  │
+│  + manageCategories()                │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│      DEVELOPER (hérité de User)      │
+├──────────────────────────────────────┤
+│ Méthodes supplémentaires:            │
+│  + submitGame(game_data)             │
+│  + editGame(game_id, data)           │
+│  + deleteGame(game_id)               │
+│  + viewGameStatus()                  │
+│  + uploadScreenshots()               │
+└──────────────────────────────────────┘
+
+
+3. RELATIONS ET CARDINALITÉS
+──────────────────────────────────────────────────────────────────────────────
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Relation                      │ Type   │ Description                        │
+├────────────────────────────────────────────────────────────────────────────┤
+│ User ──→ Game                 │ 1 : 0..* │ Un développeur crée 0 ou +       │
+│                                │        │   jeux                           │
+│ Game ──→ Screenshot           │ 1 : 0..* │ Un jeu a 0 ou plusieurs images   │
+│ Game ──→ Category             │ 1 : 1    │ Un jeu appartient à UNE catég.  │
+│ User ──→ LibraryEntry         │ 1 : 0..* │ Un user a 0 ou + jeux favoris  │
+│ Game ──→ DownloadHistory      │ 1 : 0..* │ Chaque téléch. est enregistré   │
+│ User ──→ DownloadHistory      │ 1 : 0..* │ Un user peut télécharger +      │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+4. DIAGRAMME RELATIONNEL SIMPLIFIÉ
+──────────────────────────────────────────────────────────────────────────────
+
+                              ┌─────────────┐
+                              │    User     │
+                              │   (admin,   │
+                              │  developer, │
+                              │    user)    │
+                              └──────┬──────┘
+                                     │
+                  ┌──────────────────┼──────────────────┐
+                  │                  │                  │
+                  │ (1:0..*)         │ (1:0..*)         │ (1:0..*)
+                  │                  │                  │
+             ┌────▼────┐        ┌────▼────────┐    ┌───▼──────┐
+             │  Game   │        │LibraryEntry │    │DownloadH │
+             └────┬────┘        └─────────────┘    └──────────┘
+                  │
+        ┌─────────┼──────────┐
+        │ (1:0..*)│          │ (1:1)
+        │         │          │
+   ┌────▼────┐   ┌▼────────┐
+   │Screenshot│  │ Category│
+   └─────────┘   └─────────┘
+
+
+5. IMPLÉMENTATION EN SQL (DJANGO MODELS)
+──────────────────────────────────────────────────────────────────────────────
+
+# Tables principales :
+
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(150) UNIQUE NOT NULL,
+    email VARCHAR(254) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'developer', 'user') DEFAULT 'user',
+    date_joined DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE games (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    file_path VARCHAR(500),
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    developer_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (developer_id) REFERENCES users(id)
+);
+
+CREATE TABLE categories (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE screenshots (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    image_path VARCHAR(500),
+    game_id INT NOT NULL,
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES games(id)
+);
+
+CREATE TABLE library_entries (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    game_id INT NOT NULL,
+    added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (game_id) REFERENCES games(id),
+    UNIQUE(user_id, game_id)
+);
+
+CREATE TABLE download_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    game_id INT NOT NULL,
+    user_id INT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    device_info VARCHAR(255),
+    FOREIGN KEY (game_id) REFERENCES games(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+===============================================================================
+
