@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     UserRegistrationView,
     UserListCreateView,
-    UserRetrieveUpdateDestroyView
+    UserRetrieveUpdateDestroyView,
+    LoginView
 )
 
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
 
     # GET (Retrieve), PUT/PATCH (Update), DELETE (Destroy) a specific user
     path('users/<int:pk>/', UserRetrieveUpdateDestroyView.as_view(), name='user-detail'),
+    # POST to login and obtain auth token
+    path('login/', LoginView.as_view(), name='user-login'),
 ]

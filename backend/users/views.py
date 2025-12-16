@@ -1,8 +1,12 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, LoginSerializer
 from .permissions import IsAdminUser, IsOwnerOrAdmin
+from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
+
 
 # --- Registration View ---
 
@@ -104,3 +108,42 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
 
         return [permission() for permission in permission_classes]
+
+
+class LoginView(APIView):
+    """
+    API endpoint for user login.
+    Returns auth token + user data.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+
+        user = authenticate(username=username, password=password)
+
+        if not user:
+            return Response(
+                {"detail": "Invalid username or password."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Get or create token
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "token": token.key,
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        request.user.auth_token.delete()
+        return Response({"detail": "Logged out successfully."})
