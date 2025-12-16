@@ -1,3 +1,106 @@
-from django.shortcuts import render
+from rest_framework import generics, permissions, status
+from rest_framework.response import Response
+from .models import User
+from .serializers import UserSerializer
+from .permissions import IsAdminUser, IsOwnerOrAdmin
 
-# Create your views here.
+# --- Registration View ---
+
+
+class UserRegistrationView(generics.CreateAPIView):
+    """
+    API endpoint for user registration.
+    Handles POST requests to create a new user.
+    Uses UserSerializer.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # Allow anyone to register
+    permission_classes = [permissions.AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Custom create method to handle successful response
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # The .create() method in UserSerializer handles password hashing
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+
+        # Optionally, remove the sensitive 'password' field from the response
+        response_data = serializer.data.copy()
+        if 'password' in response_data:
+            del response_data['password']
+
+        return Response(
+            response_data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
+# --- User Management Views (Admin-Only and Detail) ---
+
+
+class UserListCreateView(generics.ListCreateAPIView):
+    """
+    API endpoint for listing and creating users (Management).
+    - GET: List all users (Admin only).
+    - POST: Create a new user (Admin only, or could be registration if you use this instead).
+    """
+    queryset = User.objects.all().order_by('date_joined')
+    serializer_class = UserSerializer
+    # Only Admin users can access this list
+    permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+
+
+class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a user by ID.
+    - GET: Retrieve a user (Admin or the user themselves).
+    - PUT/PATCH: Update a user (Admin or the user themselves).
+    - DELETE: Delete a user (Admin only).
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # Use IsOwnerOrAdmin for object-level permissions
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+    # Need to modify the queryset or the lookup field for IsOwnerOrAdmin to work
+    # We will assume the URL lookup field is 'pk' (the user's ID)
+
+    def get_object(self):
+        """
+        Overrides get_object to ensure obj.developer == request.user works correctly.
+        Since the object is a User instance, we need to adapt IsOwnerOrAdmin's logic
+        to check against the User instance itself, not a 'developer' field.
+        """
+        obj = super().get_object()
+
+        # Adapt IsOwnerOrAdmin logic for the User object itself
+        # Change: 'obj.developer == request.user' to 'obj == self.request.user'
+        if self.request.user.role == 'admin':
+            return obj
+
+        if obj != self.request.user:
+            self.permission_denied(
+                self.request,
+                message='You do not have permission to access this user.'
+            )
+
+        return obj
+
+    def get_permissions(self):
+        """
+        Instantiates and returns the list of permissions that this view requires.
+        Special case: DELETE is typically Admin-only.
+        """
+        if self.request.method == 'DELETE':
+            # Only Admin can delete users
+            permission_classes = [permissions.IsAuthenticated, IsAdminUser]
+        else:
+            # Owner or Admin can Retrieve/Update
+            permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+
+        return [permission() for permission in permission_classes]
