@@ -40,6 +40,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "api",
+    "users",
+    "games",
+    "library",
+    "downloads",
 ]
 
 MIDDLEWARE = [
