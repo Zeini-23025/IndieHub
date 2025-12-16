@@ -26,7 +26,10 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        # Do not import authenticate here to keep serializer pure; view will call authenticate
+        # Do not import authenticate here to keep serializer pure;
+        #  view will call authenticate
         if not data.get('username') or not data.get('password'):
-            raise serializers.ValidationError('Must include "username" and "password".')
+            raise serializers.ValidationError(
+                'Must include "username" and "password".'
+                )
         return data

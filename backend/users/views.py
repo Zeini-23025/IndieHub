@@ -51,7 +51,9 @@ class UserListCreateView(generics.ListCreateAPIView):
     """
     API endpoint for listing and creating users (Management).
     - GET: List all users (Admin only).
-    - POST: Create a new user (Admin only, or could be registration if you use this instead).
+    - POST: Create a new user (
+    Admin only, or could be registration if you use this instead
+    ).
     """
     queryset = User.objects.all().order_by('date_joined')
     serializer_class = UserSerializer
@@ -71,14 +73,16 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     # Use IsOwnerOrAdmin for object-level permissions
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
 
-    # Need to modify the queryset or the lookup field for IsOwnerOrAdmin to work
+    # Need to modify queryset or lookup field for IsOwnerOrAdmin
     # We will assume the URL lookup field is 'pk' (the user's ID)
 
     def get_object(self):
         """
-        Overrides get_object to ensure obj.developer == request.user works correctly.
-        Since the object is a User instance, we need to adapt IsOwnerOrAdmin's logic
-        to check against the User instance itself, not a 'developer' field.
+        Overrides get_object so that obj.developer == request.user
+        works correctly.
+        Since the object is a User instance, adapt IsOwnerOrAdmin's
+        logic to check the User instance itself, not a 'developer'
+        field.
         """
         obj = super().get_object()
 
@@ -97,7 +101,8 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_permissions(self):
         """
-        Instantiates and returns the list of permissions that this view requires.
+        Instantiates and returns the list of permissions that this view
+        requires.
         Special case: DELETE is typically Admin-only.
         """
         if self.request.method == 'DELETE':
