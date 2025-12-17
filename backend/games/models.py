@@ -16,6 +16,15 @@ class Category(models.Model):
         blank=True,
         help_text='Category description'
     )
+    name_ar = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text='Category name in Arabic'
+    )
+    description_ar = models.TextField(
+        blank=True,
+        help_text='Category description in Arabic'
+    )
 
     class Meta:
         verbose_name = 'Category'
