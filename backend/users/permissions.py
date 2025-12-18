@@ -24,6 +24,32 @@ class IsDeveloperUser(permissions.BasePermission):
 class IsOwnerOrAdmin(permissions.BasePermission):
     """Check if user is owner or admin"""
     def has_object_permission(self, request, view, obj):
-        if request.user.role == 'admin':
+        # Admins can access any object
+        if request.user and getattr(request.user, 'role', None) == 'admin':
             return True
-        return obj == request.user
+
+        # If obj is the user instance, allow owner
+        try:
+            if obj == request.user:
+                return True
+        except Exception:
+            # defensive: obj comparison might error for non-model objects
+            pass
+
+        # If obj has a developer or owner attribute, allow if it matches
+        owner = getattr(obj, 'developer', None) or getattr(obj, 'owner', None)
+        if owner is not None:
+            return owner == request.user
+
+        return False
+
+
+class IsAdminOrDeveloper(permissions.BasePermission):
+    """Allow access only to users with role admin or developer"""
+
+    def has_permission(self, request, view):
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and getattr(request.user, 'role', None) in ('admin', 'developer')
+        )
