@@ -1,8 +1,9 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-from .models import Category
-from .serializers import CategorySerializer
-from users.permissions import IsAdminUser
+from django.db.models import Q
+from .models import Category, Game
+from .serializers import CategorySerializer, GameSerializer
+from users.permissions import IsAdminUser, IsAdminOrDeveloper, IsOwnerOrAdmin
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -39,3 +40,89 @@ class CategoryListView(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     permission_classes = []  # Allow any user (authenticated or not)
+
+
+class GameViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing games.
+    - Public (anonymous) users see only approved games.
+        - Developers can create games and manage their own games.
+            They cannot change the status field.
+    - Admins can manage all games and change status.
+    """
+    queryset = Game.objects.all().order_by('-created_at')
+    serializer_class = GameSerializer
+    permission_classes = [IsAdminOrDeveloper, IsOwnerOrAdmin]
+
+    def create(self, request, *args, **kwargs):
+        """
+        Custom create method to handle successful response
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
+    def get_queryset(self):
+        user = self.request.user
+        # Admin sees everything
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'admin'
+        ):
+            return Game.objects.all().order_by('-created_at')
+
+        # Developers see their own games and approved games
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'developer'
+        ):
+            return (
+                Game.objects.filter(Q(status='approved') | Q(developer=user))
+                .order_by('-created_at')
+            )
+
+        # Public: only approved games
+        return Game.objects.filter(status='approved').order_by('-created_at')
+
+    def perform_create(self, serializer):
+        # Serializer assigns developer for developer users; admin may set it.
+        serializer.save()
+
+
+class GameListView(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint for listing and retrieving games.
+    Accessible by all users.
+    """
+    queryset = Game.objects.all().order_by('-created_at')
+    serializer_class = GameSerializer
+    permission_classes = []  # Allow any user (authenticated or not)
+
+    def get_queryset(self):
+        # Same filtering rules as the main GameViewSet
+        user = self.request.user
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'admin'
+        ):
+            return Game.objects.all().order_by('-created_at')
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'developer'
+        ):
+            return (
+                Game.objects.filter(Q(status='approved') | Q(developer=user))
+                .order_by('-created_at')
+            )
+        return Game.objects.filter(status='approved').order_by('-created_at')
