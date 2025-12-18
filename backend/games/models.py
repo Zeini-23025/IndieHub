@@ -49,8 +49,15 @@ class Game(models.Model):
         max_length=255,
         help_text='Game title'
     )
+    title_ar = models.CharField(
+        max_length=255,
+        help_text='Game title in Arabic'
+    )
     description = models.TextField(
         help_text='Game description'
+    )
+    description_ar = models.TextField(
+        help_text='Game description in Arabic'
     )
     file_path = models.FileField(
         upload_to='games/',
