@@ -31,7 +31,9 @@
 │ Attributs:                           │
 │  • id (PK)                           │
 │  • title (string)                    │
+│  • title_ar (string)                 │
 │  • description (text)                │
+│  • description_ar (text)             │
 │  • file_path (string)                │
 │  • status (pending|approved|rejected)│
 │  • created_at (datetime)             │
@@ -67,6 +69,8 @@
 │  • id (PK)                           │
 │  • name (string, unique)             │
 │  • description (text)                │
+│  • name_ar (string, unique)          │
+│  • description_ar (text)             │
 ├──────────────────────────────────────┤
 │ Méthodes:                            │
 │  + assignCategory()                  │
@@ -192,7 +196,9 @@ CREATE TABLE users (
 CREATE TABLE games (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
+    title_ar VARCHAR(255) NOT NULL,
     description TEXT,
+    description_ar TEXT,
     file_path VARCHAR(500),
     status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     developer_id INT NOT NULL,
@@ -204,7 +210,9 @@ CREATE TABLE games (
 CREATE TABLE categories (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT
+    description TEXT,
+    name_ar VARCHAR(100) UNIQUE NOT NULL,
+    description_ar TEXT
 );
 
 CREATE TABLE screenshots (
@@ -231,6 +239,7 @@ CREATE TABLE download_history (
     user_id INT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     device_info VARCHAR(255),
+    ip_address VARCHAR(39),
     FOREIGN KEY (game_id) REFERENCES games(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
