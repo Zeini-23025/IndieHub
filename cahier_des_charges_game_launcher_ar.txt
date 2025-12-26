@@ -82,12 +82,11 @@
   • DownloadHistory (سجل التنزيلات)
 
 نقاط نهاية API :
-  • POST   /auth/login                      (المصادقة)
-  • POST   /dev/games/create                (إنشاء لعبة)
-  • GET    /games                           (قائمة الألعاب)
-  • GET    /games/{id}                      (تفاصيل اللعبة)
-  • POST   /admin/games/{id}/approve        (الموافقة من المسؤول)
-  • POST   /admin/games/{id}/reject         (رفض من المسؤول)
+  • POST   /api/users/login/                (المصادقة)
+  • POST   /api/games/games/                (إنشاء لعبة)
+  • GET    /api/games/games-list/           (قائمة الألعاب)
+  • GET    /api/games/games-list/{id}/      (تفاصيل اللعبة)
+  • PATCH  /api/games/games/{id}/           (الموافقة/رفض من المسؤول)
 
 الواجهة الأمامية – REACT
 ─────────────────────────

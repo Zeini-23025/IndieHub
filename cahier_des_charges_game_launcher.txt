@@ -81,12 +81,11 @@ Modèles de données :
   • DownloadHistory
 
 API Endpoints :
-  • POST   /auth/login                      (Authentification)
-  • POST   /dev/games/create                (Création de jeu)
-  • GET    /games                           (Liste des jeux)
-  • GET    /games/{id}                      (Détails du jeu)
-  • POST   /admin/games/{id}/approve        (Approbation par admin)
-  • POST   /admin/games/{id}/reject         (Rejet par admin)
+  • POST   /api/users/login/                (Authentification)
+  • POST   /api/games/games/                (Création de jeu)
+  • GET    /api/games/games-list/           (Liste des jeux)
+  • GET    /api/games/games-list/{id}/      (Détails du jeu)
+  • PATCH  /api/games/games/{id}/           (Approbation/Rejet par admin)
 
 FRONTEND – REACT
 ────────────────

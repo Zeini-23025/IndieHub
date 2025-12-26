@@ -10,6 +10,7 @@ A web application that centralizes independent games and promotes developers fro
 - **Developer Dashboard**: Track game submission status and manage uploaded games
 - **User Accounts**: Personal library and download history for registered users
 - **Admin Panel**: Manage users, validate submissions, and oversee content
+- **Bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR)
 
 ## 📋 User Roles
 
@@ -102,20 +103,50 @@ The application will be available at `http://localhost:5173`
 
 ```
 IndieHub/
-├── backend/              # Django REST API
-│   ├── api/             # Main API app
-│   ├── backend/         # Project settings
-│   └── manage.py
-├── frontend/            # React + TypeScript
-│   ├── src/            # Source code
-│   ├── public/         # Static assets
-│   └── package.json
+├── backend/                  # Django REST API
+│   ├── api/                 # Core API configuration
+│   ├── games/               # Games management app
+│   │   ├── models.py        # Game, Category, Screenshot models
+│   │   ├── serializers.py   # DRF serializers
+│   │   ├── views.py         # API views & viewsets
+│   │   └── urls.py          # App-specific routes
+│   ├── users/               # User management & Auth
+│   │   ├── models.py        # Custom User model
+│   │   ├── views.py         # Login/Register views
+│   │   └── permissions.py   # Custom permissions (IsAdmin, IsDeveloper)
+│   ├── library/             # User library (purchased/added games)
+│   ├── downloads/           # Download tracking & history
+│   ├── backend/             # Project settings (settings.py, etc.)
+│   └── manage.py            # Django management script
+├── frontend/                # React + TypeScript Client
+│   ├── src/                 # Source code
+│   │   ├── assets/          # Images & global styles
+│   │   ├── App.tsx          # Main application component
+│   │   └── main.tsx         # Entry point
+│   ├── public/              # Static assets (favicons, etc.)
+│   ├── index.html           # HTML entry point
+│   ├── package.json         # NPM dependencies
+│   └── vite.config.ts       # Vite configuration
 └── README.md
 ```
 
 ## 🔌 API Endpoints
 
-The API documentation will be available at `http://localhost:8000/api/` once the backend is running.
+Base URL: `http://localhost:8000/api/`
+
+### Authentication & Users
+- `POST /users/login/` - Authenticate & get token
+- `POST /users/register/` - Register new user
+- `GET /users/users/` - List users (Admin)
+
+### Games Management
+- `GET /games/games-list/` - List approved games (Public/Search)
+- `GET /games/games-list/{id}/` - Retrieve game details
+- `POST /games/games/` - Submit a new game (Developer)
+- `PATCH /games/games/{id}/` - Update game or Approve/Reject (Admin)
+
+### Categories
+- `GET /games/categories-list/` - List all categories
 
 ## 🤝 Contributing
 
