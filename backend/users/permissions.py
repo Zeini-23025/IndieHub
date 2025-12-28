@@ -35,9 +35,13 @@ class IsOwnerOrAdmin(permissions.BasePermission):
         except Exception:
             # defensive: obj comparison might error for non-model objects
             pass
-
-        # If obj has a developer or owner attribute, allow if it matches
-        owner = getattr(obj, 'developer', None) or getattr(obj, 'owner', None)
+        # If obj has `user`, `developer` or `owner` attr, allow if it matches.
+        # LibraryEntry uses `user`. Game may use `developer`; others `owner`.
+        owner = getattr(obj, 'user', None)
+        if owner is None:
+            owner = getattr(obj, 'developer', None)
+        if owner is None:
+            owner = getattr(obj, 'owner', None)
         if owner is not None:
             return owner == request.user
 
