@@ -9,6 +9,7 @@ A web application that centralizes independent games and promotes developers fro
 - **Game Browser**: Users can search, filter, and download validated games
 - **Developer Dashboard**: Track game submission status and manage uploaded games
 - **User Accounts**: Personal library and download history for registered users
+- **Library Management**: Users can manage their personal collection of games
 - **Admin Panel**: Manage users, validate submissions, and oversee content
 - **Bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR)
 
@@ -115,6 +116,10 @@ IndieHub/
 │   │   ├── views.py         # Login/Register views
 │   │   └── permissions.py   # Custom permissions (IsAdmin, IsDeveloper)
 │   ├── library/             # User library (purchased/added games)
+│   │   ├── models.py        # LibraryEntry model
+│   │   ├── serializers.py   # LibraryEntrySerializer
+│   │   ├── views.py         # LibraryEntryViewSet
+│   │   └── urls.py          # Library routes
 │   ├── downloads/           # Download tracking & history
 │   ├── backend/             # Project settings (settings.py, etc.)
 │   └── manage.py            # Django management script
@@ -147,6 +152,12 @@ Base URL: `http://localhost:8000/api/`
 
 ### Categories
 - `GET /games/categories-list/` - List all categories
+
+### Library
+- `GET /library/entries/` - List user's library entries
+- `POST /library/entries/` - Add game to library
+- `GET /library/entries/{id}/` - Retrieve library entry
+- `DELETE /library/entries/{id}/` - Remove game from library
 
 ## 🤝 Contributing
 
