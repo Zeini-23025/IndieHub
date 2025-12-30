@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import User
 from django.core.validators import FileExtensionValidator
+from django.db.models import Q
 
 
 class Category(models.Model):
@@ -114,6 +115,13 @@ class Screenshot(models.Model):
         upload_to='screenshots/',
         help_text='Screenshot image'
     )
+    is_base = models.BooleanField(
+        default=False,
+        help_text=(
+            'Marks this screenshot as the base/primary image '
+            'for the game'
+        ),
+    )
     uploaded_at = models.DateTimeField(
         auto_now_add=True,
         help_text='Upload timestamp'
@@ -123,6 +131,14 @@ class Screenshot(models.Model):
         verbose_name = 'Screenshot'
         verbose_name_plural = 'Screenshots'
         ordering = ['uploaded_at']
+        constraints = [
+            # Ensure only one base screenshot per game
+            models.UniqueConstraint(
+                fields=['game'],
+                condition=Q(is_base=True),
+                name='unique_base_screenshot_per_game'
+            ),
+        ]
 
     def __str__(self):
         return f"Screenshot for {self.game.title}"

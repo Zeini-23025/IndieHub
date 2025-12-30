@@ -118,11 +118,15 @@ class Command(BaseCommand):
             games.append(game)
             
             # Create dummy screenshots if game created
+            # Ensure each game has up to 4 screenshots and one base image
             if created:
-                for j in range(random.randint(1, 3)):
+                # create 4 screenshots
+                base_index = random.randint(0, 3)
+                for j in range(4):
                     Screenshot.objects.create(
                         game=game,
-                        image_path='screenshots/dummy_shot.jpg'
+                        image_path='screenshots/dummy_shot.jpg',
+                        is_base=(j == base_index),
                     )
 
         # 4. Create Library Entries & Downloads for Approved Games
@@ -133,7 +137,9 @@ class Command(BaseCommand):
             for user in users:
                 # Add random games to library
                 num_games = random.randint(0, 5)
-                selected_games = random.sample(approved_games, min(num_games, len(approved_games)))
+                selected_games = random.sample(
+                    approved_games, min(num_games, len(approved_games))
+                )
                 
                 for game in selected_games:
                     LibraryEntry.objects.get_or_create(user=user, game=game)
@@ -147,4 +153,8 @@ class Command(BaseCommand):
                             ip_address=f'192.168.1.{random.randint(1, 255)}'
                         )
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated database with example data!'))
+        self.stdout.write(
+            self.style.SUCCESS(
+                'Successfully populated database with example data!'
+            )
+        )

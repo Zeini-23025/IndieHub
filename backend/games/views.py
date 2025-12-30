@@ -1,8 +1,11 @@
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
-from .models import Category, Game
-from .serializers import CategorySerializer, GameSerializer
+from .models import Category, Game, Screenshot
+from .serializers import (
+    CategorySerializer, GameSerializer, ScreenshotSerializer
+    )
 from users.permissions import IsAdminUser, IsAdminOrDeveloper, IsOwnerOrAdmin
 
 
@@ -126,3 +129,52 @@ class GameListView(viewsets.ReadOnlyModelViewSet):
                 .order_by('-created_at')
             )
         return Game.objects.filter(status='approved').order_by('-created_at')
+
+
+class ScreenshotViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing game screenshots.
+    - Developers can manage screenshots for their own games.
+    - Admins can manage all screenshots.
+    """
+    queryset = Screenshot.objects.all().order_by('-uploaded_at')
+    serializer_class = ScreenshotSerializer
+    permission_classes = [IsAdminOrDeveloper, IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Admin sees everything
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'admin'
+        ):
+            return Screenshot.objects.all().order_by('-uploaded_at')
+
+        # Developers see screenshots for their own games
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'developer'
+        ):
+            return Screenshot.objects.filter(
+                game__developer=user
+            ).order_by('-uploaded_at')
+
+        # Public: no access to screenshots
+        return Screenshot.objects.none()
+
+    def perform_create(self, serializer):
+        # Ensure that developers can only add screenshots to their own games
+        user = self.request.user
+        game = serializer.validated_data.get('game')
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'developer'
+        ):
+            if game.developer != user:
+                raise PermissionDenied(
+                    "You can only add screenshots to your own games."
+                )
+        serializer.save()
