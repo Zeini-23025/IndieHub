@@ -159,6 +159,18 @@ Base URL: `http://localhost:8000/api/`
 - `GET /library/entries/{id}/` - Retrieve library entry
 - `DELETE /library/entries/{id}/` - Remove game from library
 
+### Downloads
+- `POST /downloads/downloads/` - Create a download history record (anonymous or authenticated)
+- `GET /downloads/downloads/` - List download history records (Admin only)
+- `GET /downloads/games/{game_id}/download/` - Protected game download (streams file; auth required)
+
+### Screenshots
+- `GET /games/screenshots/` - List screenshots (public)
+- `GET /games/screenshots/{id}/` - Retrieve a screenshot
+- `POST /games/screenshots/` - Upload a screenshot (game developer/owner or admin)
+- `PATCH /games/screenshots/{id}/` - Update screenshot (owner or admin)
+- `DELETE /games/screenshots/{id}/` - Delete screenshot (owner or admin)
+
 ## 🤝 Contributing
 
 1. Create a feature branch
