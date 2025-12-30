@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from .models import Category, Game
+from .models import Category, Game, Screenshot
 from users.models import User
 
 
@@ -69,3 +69,11 @@ class GameSerializer(serializers.ModelSerializer):
         if not is_admin and 'status' in validated_data:
             raise PermissionDenied('Only admin users can change the status.')
         return super().update(instance, validated_data)
+
+
+class ScreenshotSerializer(serializers.ModelSerializer):
+    """Serializer for Game Screenshot"""
+    class Meta:
+        model = Screenshot
+        fields = ['id', 'game', 'image_path', 'is_base', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at']
