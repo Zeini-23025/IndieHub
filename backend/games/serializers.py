@@ -23,13 +23,24 @@ class GameSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    # Read nested categories, write via category_ids (list of PKs)
+    categories = CategorySerializer(many=True, read_only=True)
+    category_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all(),
+        write_only=True,
+        source='categories',
+        required=False,
+    )
 
     class Meta:
         model = Game
         fields = [
             'id', 'title', 'description',
             'title_ar', 'description_ar',
-            'file_path', 'status', 'developer', 'created_at', 'updated_at'
+            'file_path', 'status', 'developer',
+            'categories', 'category_ids',
+            'created_at', 'updated_at'
         ]
     read_only_fields = ['id', 'status', 'created_at', 'updated_at']
 
