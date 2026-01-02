@@ -2,9 +2,9 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
-from .models import Category, Game, Screenshot
+from .models import Category, Game, Screenshot, Review
 from .serializers import (
-    CategorySerializer, GameSerializer, ScreenshotSerializer
+    CategorySerializer, GameSerializer, ScreenshotSerializer, ReviewSerializer
     )
 from users.permissions import IsAdminUser, IsAdminOrDeveloper, IsOwnerOrAdmin
 
@@ -178,3 +178,58 @@ class ScreenshotViewSet(viewsets.ModelViewSet):
                     "You can only add screenshots to your own games."
                 )
         serializer.save()
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for managing game reviews (owner/admin operations).
+    - Authenticated users can create reviews and manage their own reviews.
+    - Admins can manage all reviews.
+    """
+    queryset = Review.objects.all().order_by('-created_at')
+    serializer_class = ReviewSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Admin sees everything
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) == 'admin'
+        ):
+            return Review.objects.all().order_by('-created_at')
+
+        # Authenticated users see their own reviews
+        if user and user.is_authenticated:
+            return Review.objects.filter(user=user).order_by('-created_at')
+
+        # Public: no access to write/manage reviews
+        return Review.objects.none()
+
+    def perform_create(self, serializer):
+        # Assign the review author as the current user
+        user = self.request.user
+        if user and user.is_authenticated:
+            serializer.save(user=user)
+        else:
+            raise PermissionDenied(
+                'Authentication required to create reviews.'
+            )
+
+
+class ReviewListView(viewsets.ReadOnlyModelViewSet):
+    """
+    Public read-only view for listing and retrieving reviews.
+    Allows filtering by game.
+    """
+    queryset = Review.objects.all().order_by('-created_at')
+    serializer_class = ReviewSerializer
+    permission_classes = []  # Allow any (public)
+
+    def get_queryset(self):
+        qs = Review.objects.all().order_by('-created_at')
+        game_id = self.request.query_params.get('game')
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        return qs

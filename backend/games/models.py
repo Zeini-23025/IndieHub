@@ -154,3 +154,45 @@ class Screenshot(models.Model):
 
     def __str__(self):
         return f"Screenshot for {self.game.title}"
+
+
+class Review(models.Model):
+    """
+    Reviews for games
+    """
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        help_text='Reviewed game'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        help_text='Reviewing user'
+    )
+    rating = models.PositiveSmallIntegerField(
+        help_text='Rating score (1-5)'
+    )
+    comment = models.TextField(
+        blank=True,
+        help_text='Review comment'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text='Creation timestamp'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text='Last update timestamp'
+    )
+
+    class Meta:
+        verbose_name = 'Review'
+        verbose_name_plural = 'Reviews'
+        unique_together = ('game', 'user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Review by {self.user.username} for {self.game.title}"

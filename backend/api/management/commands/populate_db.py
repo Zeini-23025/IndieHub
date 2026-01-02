@@ -2,7 +2,7 @@ import random
 from django.core.management.base import BaseCommand
 from django.db import connection
 from users.models import User
-from games.models import Game, Category, Screenshot
+from games.models import Game, Category, Screenshot, Review
 from library.models import LibraryEntry
 from downloads.models import DownloadHistory
 
@@ -186,6 +186,45 @@ class Command(BaseCommand):
                             device_info='Windows PC',
                             ip_address=f'192.168.1.{random.randint(1, 255)}'
                         )
+
+        # 5. Create Reviews for approved games (if the table exists)
+        review_table = 'games_review'
+        if review_table in existing_tables:
+            self.stdout.write('Creating reviews for approved games...')
+            sample_comments = [
+                'Loved it!',
+                'Pretty good, enjoyed the gameplay.',
+                'Needs polishing but promising.',
+                'Not my cup of tea.',
+                'Fun with friends!',
+                'Challenging and rewarding.'
+            ]
+
+            for game in approved_games:
+                # create 0-5 reviews per approved game from distinct users
+                num_reviews = random.randint(0, min(5, len(users)))
+                if num_reviews == 0:
+                    continue
+                reviewers = random.sample(users, num_reviews)
+                for reviewer in reviewers:
+                    rating = random.randint(1, 5)
+                    comment = random.choice(sample_comments)
+                    # Use get_or_create to avoid violating unique_together
+                    Review.objects.get_or_create(
+                        game=game,
+                        user=reviewer,
+                        defaults={'rating': rating, 'comment': comment}
+                    )
+        else:
+            self.stdout.write(
+                self.style.WARNING(
+                    (
+                        "Skipping review creation because table '",
+                        f"{review_table}",
+                        "' does not exist."
+                    )
+                )
+            )
 
         self.stdout.write(
             self.style.SUCCESS(
