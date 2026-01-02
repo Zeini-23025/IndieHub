@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
-from .models import Category, Game, Screenshot
+from .models import Category, Game, Screenshot, Review
 from users.models import User
 
 
@@ -88,3 +88,54 @@ class ScreenshotSerializer(serializers.ModelSerializer):
         model = Screenshot
         fields = ['id', 'game', 'image_path', 'is_base', 'uploaded_at']
         read_only_fields = ['id', 'uploaded_at']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    """Serializer for Game Review"""
+    # Expose the review author as a read-only nested object (id + username)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    user_username = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'game', 'user', 'user_username',
+            'rating', 'comment',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+    def get_user_username(self, obj):
+        try:
+            return obj.user.username
+        except Exception:
+            return None
+
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError(
+                'Rating must be between 1 and 5.'
+            )
+        return value
+
+    def validate(self, attrs):
+        """Enforce one review per user per game at validation time."""
+        request = self.context.get('request')
+        # Only check on create
+        if request and request.method in ('POST',):
+            user = request.user
+            game = attrs.get('game')
+            if user and user.is_authenticated and game is not None:
+                exists = Review.objects.filter(game=game, user=user).exists()
+                if exists:
+                    raise serializers.ValidationError(
+                        'You have already reviewed this game.'
+                    )
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        # Set the review user from the request
+        request = self.context.get('request')
+        if request and request.user and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)
