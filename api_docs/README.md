@@ -22,7 +22,7 @@ Note: include `Authorization: Token <TOKEN>` for authenticated requests.
 |-------:|-------------------------------------|--------------------------------------------------|
 | GET    | `/api/games/games-list/`            | Public list of approved games                    |
 | GET    | `/api/games/games-list/{id}/`       | Public game detail                                |
-| POST   | `/api/games/games/`                 | Submit a new game (developer) — multipart/form    |
+| POST   | `/api/games/games/`                 | Submit a new game (developer) — multipart/form; use `category_ids` (one or more) to assign categories; responses include `categories` array |
 | PATCH  | `/api/games/games/{id}/`            | Update a game (owner or admin)                    |
 | DELETE | `/api/games/games/{id}/`            | Delete a game (owner or admin)                    |
 
@@ -108,10 +108,3 @@ The `User` model contains a `role` field (`admin`, `developer`, `user`). Use `Au
 - ReDoc: `http://127.0.0.1:8000/redoc/`
 
 ---
-
-If you'd like, I can:
-- generate a Postman collection or an OpenAPI (Swagger) spec from these docs;
-- add curl examples for the Downloads and Screenshots sections;
-- create simple automated tests (pytest + requests) for key endpoints.
-
-Tell me which to prioritize and I'll proceed.

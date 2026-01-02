@@ -26,7 +26,8 @@ Game fields (exposed by `GameSerializer`):
 - `file_path` (file) — uploaded game file (zip/rar/7z/exe)
 - `status` (string) — one of `pending`, `approved`, `rejected`; default `pending`
 - `developer` (integer) — user id (FK to `users.User`)
-- `category` (integer) — category id (FK to `games.Category`)
+- `categories` (array) — list of category objects (read-only)
+  Use `category_ids` (array of integers or repeated form fields) in write requests to assign one or more categories.
 - `rejection_reason` (string) — optional
 - `created_at` / `updated_at` (timestamps)
 
@@ -73,7 +74,9 @@ Example response (partial):
     "description": "An endless runner in space",
     "status": "approved",
     "developer": 5,
-    "category": 2,
+    "categories": [
+      { "id": 2, "name": "Action" }
+    ],
     "created_at": "2025-12-18T19:00:00Z"
   }
 ]
@@ -97,7 +100,7 @@ title (string, required)
 title_ar (string, required)
 description (string, required)
 description_ar (string, required)
-category (int, optional)
+category_ids (int or repeated form fields, optional) — one or more category ids to assign to the game
 file_path (file upload, required if model requires)
 status (string, optional — only honored if admin)
 developer (int, optional — admin only)
@@ -148,7 +151,7 @@ curl -i -X POST http://127.0.0.1:8000/api/games/games/ \
   -F "title_ar=لعبتي" \
   -F "description=A cool game by dev" \
   -F "description_ar=لعبة رائعة" \
-  -F "category=<CATEGORY_ID>" \
+  -F "category_ids=<CATEGORY_ID>" \
   -F "file_path=@/tmp/dummy_game.zip;type=application/zip"
 ```
 
@@ -163,7 +166,7 @@ curl -i -X POST http://127.0.0.1:8000/api/games/games/ \
   -F "title_ar=لعبة المدير" \
   -F "description=Added by admin" \
   -F "description_ar=أضيفت من قبل المسؤول" \
-  -F "category=<CATEGORY_ID>" \
+  -F "category_ids=<CATEGORY_ID>" \
   -F "developer=<DEVELOPER_ID>" \
   -F "status=approved" \
   -F "file_path=@/tmp/dummy_game.zip;type=application/zip"
@@ -239,9 +242,7 @@ python3 manage.py runserver
 ```
 
 2. Use the curl examples above. If you need session/CSRF examples (cookie-jar), I can add them.
-
 If you'd like, I can also produce an OpenAPI snippet or a Postman collection for these endpoints.
-
 Document created at `api_docs/game_api.md`.
 
 ````
