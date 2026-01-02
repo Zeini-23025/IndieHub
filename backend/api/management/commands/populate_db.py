@@ -1,10 +1,11 @@
-import os
 import random
 from django.core.management.base import BaseCommand
+from django.db import connection
 from users.models import User
 from games.models import Game, Category, Screenshot
 from library.models import LibraryEntry
 from downloads.models import DownloadHistory
+
 
 class Command(BaseCommand):
     help = 'Populates the database with example data'
@@ -14,7 +15,7 @@ class Command(BaseCommand):
 
         # 1. Create Users
         self.stdout.write('Creating users...')
-        
+
         # Admin
         admin, _ = User.objects.get_or_create(
             username='admin',
@@ -98,11 +99,27 @@ class Command(BaseCommand):
         ]
 
         games = []
+
+        # Check whether the many-to-many join table exists. If migrations
+        # haven't been applied yet the M2M table won't exist and any
+        # attempt to write to it will raise an OperationalError. In that
+        # case we skip category assignment and continue populating other
+        # sample data so the command is resilient to running order.
+        existing_tables = connection.introspection.table_names()
+        m2m_table_name = 'games_game_categories'
+        has_m2m_table = m2m_table_name in existing_tables
+
         for i, (title, title_ar, desc, desc_ar) in enumerate(game_titles):
             developer = random.choice(devs)
-            category = random.choice(categories)
-            status = random.choice(['approved', 'approved', 'approved', 'pending', 'rejected'])
-            
+            # assign 1-3 random categories per game
+            num_cats = random.randint(1, min(3, len(categories)))
+            selected_categories = random.sample(categories, num_cats)
+            status = random.choice(
+                ['approved', 'approved', 'approved', 'pending', 'rejected']
+            )
+
+            # Create or get the game without passing category.
+            # M2M categories are handled below.
             game, created = Game.objects.get_or_create(
                 title=title,
                 defaults={
@@ -110,13 +127,30 @@ class Command(BaseCommand):
                     'description': desc,
                     'description_ar': desc_ar,
                     'developer': developer,
-                    'category': category,
                     'status': status,
                     'file_path': 'games/dummy_game.zip'
                 }
             )
+
+            # Ensure the game's categories include the selected ones.
+            # If the M2M table doesn't exist (migrations not applied yet),
+            # skip category assignment to avoid OperationalError. This
+            # makes the populate command safe to run before migrations.
+            if has_m2m_table:
+                # If the game was just created, set them. Otherwise add
+                # missing ones.
+                if created:
+                    game.categories.set(selected_categories)
+                else:
+                    for cat in selected_categories:
+                        game.categories.add(cat)
+            else:
+                self.stdout.write(self.style.WARNING(
+                    f"Skipping category assignment for game '{title}' because table '{m2m_table_name}' does not exist."
+                ))
+
             games.append(game)
-            
+
             # Create dummy screenshots if game created
             # Ensure each game has up to 4 screenshots and one base image
             if created:
@@ -132,7 +166,7 @@ class Command(BaseCommand):
         # 4. Create Library Entries & Downloads for Approved Games
         self.stdout.write('Creating user interactions...')
         approved_games = [g for g in games if g.status == 'approved']
-        
+
         if approved_games:
             for user in users:
                 # Add random games to library
@@ -140,10 +174,10 @@ class Command(BaseCommand):
                 selected_games = random.sample(
                     approved_games, min(num_games, len(approved_games))
                 )
-                
+
                 for game in selected_games:
                     LibraryEntry.objects.get_or_create(user=user, game=game)
-                    
+
                     # Randomly add download history
                     if random.choice([True, False]):
                         DownloadHistory.objects.create(
