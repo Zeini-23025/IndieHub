@@ -80,13 +80,25 @@ class Game(models.Model):
         limit_choices_to={'role': 'developer'},
         help_text='Game developer'
     )
-    category = models.ForeignKey(
+    categories = models.ManyToManyField(
         Category,
-        on_delete=models.SET_NULL,
-        null=True,
         related_name='games',
-        help_text='Game category'
+        blank=True,
+        help_text='Game categories (a game can belong to multiple categories)'
     )
+
+    # NOTE: changed to ManyToManyField to allow a game to belong to
+    # multiple categories (e.g. single-player, multiplayer, RPG, Action)
+    # Keep the field name `categories` to reflect multiple values.
+    # Existing data migration will be required to move from `category` FK
+    # to this M2M relation.
+
+    # categories = models.ManyToManyField(
+    #     Category,
+    #     related_name='games',
+    #     blank=True,
+    #     help_text='Game categories'
+    # )
     rejection_reason = models.TextField(
         blank=True,
         help_text='Reason for rejection (if rejected)'

@@ -57,6 +57,47 @@ Expected: HTTP 201 with created game JSON. The `developer` will be the authentic
 
 ---
 
+3a) Create a game with a single category
+
+```bash
+# single category (one category id)
+touch /tmp/dummy_game.zip && echo "test" > /tmp/dummy_game.zip
+
+curl -i -X POST http://127.0.0.1:8000/api/games/games/ \
+  -H "Authorization: Token <DEV_TOKEN>" \
+  -F "title=Single Cat Game" \
+  -F "title_ar=لعبة بفئة واحدة" \
+  -F "description=Game with one category" \
+  -F "description_ar=لعبة مع فئة واحدة" \
+  -F "category_ids=<CATEGORY_ID>" \
+  -F "file_path=@/tmp/dummy_game.zip;type=application/zip"
+```
+
+Expected: HTTP 201. The created game will have one category assigned.
+
+3b) Create a game with multiple categories
+
+```bash
+# multiple categories: supply category_ids multiple times
+touch /tmp/dummy_game.zip && echo "test" > /tmp/dummy_game.zip
+
+curl -i -X POST http://127.0.0.1:8000/api/games/games/ \
+  -H "Authorization: Token <DEV_TOKEN>" \
+  -F "title=Multi Cat Game" \
+  -F "title_ar=لعبة بعدة فئات" \
+  -F "description=Game with multiple categories" \
+  -F "description_ar=لعبة مع عدة فئات" \
+  -F "category_ids=<CATEGORY_ID_1>" \
+  -F "category_ids=<CATEGORY_ID_2>" \
+  -F "category_ids=<CATEGORY_ID_3>" \
+  -F "file_path=@/tmp/dummy_game.zip;type=application/zip"
+```
+
+Expected: HTTP 201. The created game will have the listed categories.
+
+Note: some HTTP clients accept array-style fields (e.g. `category_ids[]=1&category_ids[]=2`) — repeat `category_ids` as needed for curl/multipart.
+
+
 ## 4) Create a game as admin (can set developer & status)
 
 Admins may pass `developer` and `status`; still use multipart for files.
