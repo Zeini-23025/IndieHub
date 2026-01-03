@@ -1,68 +1,270 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bg-primary: #0f0f0f;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #252525;
+  --accent-primary: #6366f1;
+  --accent-primary-bright: #818cf8;
+  --accent-primary-dark: #4f46e5;
+  --accent-secondary: #8b5cf6;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+  --border-color: #2a2a2a;
+  --glow-color: rgba(99, 102, 241, 0.2);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* Subtle CRT Scanlines (optional, very light) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.03),
+      rgba(0, 0, 0, 0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.5;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+/* Press Start 2P Font - Only for Titles and Headings */
+.font-pixel {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+.font-pixel-lg {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+.font-pixel-xl {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+.font-pixel-2xl {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 20px;
+  line-height: 1.8;
+  letter-spacing: 0.05em;
+}
+
+/* Clean Borders */
+.pixel-border {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.pixel-border-accent {
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 0 12px var(--glow-color);
+}
+
+/* Subtle Glow Effect */
+.crt-glow {
+  text-shadow: 0 0 8px var(--glow-color);
+}
+
+/* Image Styling */
+.pixel-blur {
+  image-rendering: auto;
+  filter: contrast(1.05) brightness(0.98);
+}
+
+/* Modern Retro Button */
+.btn-retro {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 9px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.btn-retro:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+  box-shadow: 0 0 12px var(--glow-color);
+  color: var(--accent-primary-bright);
+  transform: translateY(-1px);
+}
+
+.btn-retro:active {
+  transform: translateY(0);
+}
+
+.btn-retro:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Game Card Hover Effect */
+.game-card {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+}
+
+/* Section Divider */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin: 32px 0;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary-dark);
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+}
+
+/* RTL-specific adjustments */
+[dir="rtl"] .game-card,
+[dir="rtl"] .pixel-border {
+  text-align: right;
+}
+
+[dir="rtl"] .space-x-2 > * + * {
+  margin-right: 0.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-4 > * + * {
+  margin-right: 1rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .space-x-6 > * + * {
+  margin-right: 1.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] aside {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .border-l-2 {
+  border-left: none;
+  border-right: 2px solid var(--accent-primary);
+}
+
+[dir="rtl"] .border-l-4 {
+  border-left: none;
+  border-right: 4px solid var(--accent-primary);
+}
+
+[dir="rtl"] .border-r {
+  border-right: none;
+  border-left: 1px solid var(--border-color);
+}
+
+[dir="rtl"] .ml-4 {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+[dir="rtl"] .mr-4 {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] .justify-start {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .justify-end {
+  justify-content: flex-start;
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-primary);
+  color: var(--text-primary);
 }

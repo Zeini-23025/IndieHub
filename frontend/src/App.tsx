@@ -1,21 +1,37 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import Games from './pages/Games';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import GameDetail from './pages/GameDetail';
+import Dashboard from './pages/Dashboard';
+import Library from './pages/Library';
+import Admin from './pages/Admin';
 
 function App() {
-  const [msg, setMsg] = useState<string>("");
-
-  useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/welcome/")
-      .then((res) => setMsg(res.data.message))
-      .catch((err) => console.error(err));
-  }, []);
-
   return (
-    <div>
-      <h1>React + Django School Management</h1>
-      <p>{msg}</p>
-    </div>
+    <Router>
+      <LanguageProvider>
+        <AuthProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/games" element={<Games />} />
+              <Route path="/games/:id" element={<GameDetail />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Layout>
+        </AuthProvider>
+      </LanguageProvider>
+    </Router>
   );
 }
 
