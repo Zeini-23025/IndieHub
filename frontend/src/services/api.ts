@@ -124,6 +124,17 @@ export const categoriesAPI = {
     const response = await api.get('/games/categories-list/');
     return response.data;
   },
+  createCategory: async (categoryData: Partial<Category>): Promise<Category> => {
+    const response = await api.post('/games/categories/', categoryData);
+    return response.data;
+  },
+  updateCategory: async (id: number, categoryData: Partial<Category>): Promise<Category> => {
+    const response = await api.patch(`/games/categories/${id}/`, categoryData);
+    return response.data;
+  },
+  deleteCategory: async (id: number) => {
+    await api.delete(`/games/categories/${id}/`);
+  },
 };
 
 // Screenshots API
