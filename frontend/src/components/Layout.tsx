@@ -75,15 +75,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </Link>
               )}
               {user?.role === 'admin' && (
-                <Link
-                  to="/admin"
-                  className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/admin')
-                    ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
-                    : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
-                    }`}
-                >
-                  {t('nav.admin')}
-                </Link>
+                <>
+                  <Link
+                    to="/admin"
+                    className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/admin')
+                      ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                      : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
+                      }`}
+                  >
+                    {t('nav.admin')}
+                  </Link>
+                  <Link
+                    to="/admin/categories"
+                    className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/admin/categories')
+                      ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                      : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
+                      }`}
+                  >
+                    {t('nav.categoryManagement')}
+                  </Link>
+                </>
               )}
             </>
           )}

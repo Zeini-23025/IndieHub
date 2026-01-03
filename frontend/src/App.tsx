@@ -10,6 +10,7 @@ import GameDetail from './pages/GameDetail';
 import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
 import Admin from './pages/Admin';
+import CategoryManagement from './pages/CategoryManagement';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Route path="/library" element={<Library />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/categories" element={<CategoryManagement />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
