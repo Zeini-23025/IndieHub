@@ -171,6 +171,16 @@ Base URL: `http://localhost:8000/api/`
 - `PATCH /games/screenshots/{id}/` - Update screenshot (owner or admin)
 - `DELETE /games/screenshots/{id}/` - Delete screenshot (owner or admin)
 
+### Reviews
+
+- `GET /games/reviews-list/` - Public list of reviews (filter with `?game=<id>`)
+- `GET /games/reviews-list/{id}/` - Retrieve a single review (public)
+- `POST /games/reviews/` - Create a review (authenticated users only; rating 1..5)
+- `PATCH /games/reviews/{id}/` - Update a review (owner or admin)
+- `DELETE /games/reviews/{id}/` - Delete a review (owner or admin)
+
+Notes: each user may submit at most one review per game (unique constraint). The `user` field is set from the auth token and is read-only on create.
+
 ## 🤝 Contributing
 
 1. Create a feature branch
