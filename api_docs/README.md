@@ -87,6 +87,22 @@ Rules:
 
 ---
 
+## ⭐ Reviews
+
+| Method | URL                                         | Description                                          |
+|-------:|---------------------------------------------|------------------------------------------------------|
+| GET    | `/api/games/reviews-list/`                  | Public list of reviews (filter by game with `?game=`) |
+| GET    | `/api/games/reviews-list/{id}/`             | Retrieve a single review                             |
+| POST   | `/api/games/reviews/`                       | Create a review (authenticated users only)           |
+| PATCH  | `/api/games/reviews/{id}/`                  | Update a review (owner or admin)                     |
+| DELETE | `/api/games/reviews/{id}/`                  | Delete a review (owner or admin)                     |
+
+Rules:
+- `rating` must be an integer between 1 and 5.
+- Each user may submit at most one review per game (unique constraint on `(game, user)`).
+- `user` is set from the auth token and is read-only on the API.
+
+
 ## 👥 Users
 
 | Method | URL                               | Description                                   |
