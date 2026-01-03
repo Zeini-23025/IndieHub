@@ -79,6 +79,25 @@
 
 
 ┌──────────────────────────────────────┐
+│            REVIEW (Avis)             │
+├──────────────────────────────────────┤
+│ Attributs:                           │
+│  • id (PK)                           │
+│  • game_id (FK → Game)               │
+│  • user_id (FK → User)               │
+│  • rating (int, 1..5)                │
+│  • comment (text, optional)          │
+│  • created_at (datetime)             │
+│  • updated_at (datetime)             │
+├──────────────────────────────────────┤
+│ Méthodes:                            │
+│  + createReview()                    │
+│  + updateReview()                    │
+│  + deleteReview()                    │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
 │       LIBRARY ENTRY (Entrée Biblio.) │
 ├──────────────────────────────────────┤
 │ Attributs:                           │
@@ -147,6 +166,8 @@
 │                                │        │   jeux                           │
 │ Game ──→ Screenshot           │ 1 : 0..* │ Un jeu a 0 ou plusieurs images   │
 │ Game ──→ Category             │ 1 : 1    │ Un jeu appartient à UNE catég.  │
+│ Game ──→ Review               │ 1 : 0..* │ Un jeu peut avoir 0 ou plusieurs avis │
+│ User ──→ Review               │ 1 : 0..* │ Un user peut écrire 0 ou plusieurs avis │
 │ User ──→ LibraryEntry         │ 1 : 0..* │ Un user a 0 ou + jeux favoris  │
 │ Game ──→ DownloadHistory      │ 1 : 0..* │ Chaque téléch. est enregistré   │
 │ User ──→ DownloadHistory      │ 1 : 0..* │ Un user peut télécharger +      │
@@ -242,6 +263,19 @@ CREATE TABLE download_history (
     ip_address VARCHAR(39),
     FOREIGN KEY (game_id) REFERENCES games(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE reviews (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    game_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating INT NOT NULL,
+    comment TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES games(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(game_id, user_id)
 );
 
 ===============================================================================
