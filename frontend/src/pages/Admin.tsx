@@ -5,15 +5,17 @@ import type { Game } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import RetroButton from '../components/RetroButton';
+import RetroInput from '../components/RetroInput';
 import RetroTextarea from '../components/RetroTextarea';
 
 const Admin: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [games, setGames] = useState<Game[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [rejectReason, setRejectReason] = useState<Record<number, string>>({});
   const [showRejectForm, setShowRejectForm] = useState<number | null>(null);
 
@@ -65,6 +67,13 @@ const Admin: React.FC = () => {
     }
   };
 
+  const filteredGames = games.filter(game => {
+    const title = (language === 'ar' ? game.title_ar : game.title).toLowerCase();
+    const description = (language === 'ar' ? game.description_ar : game.description).toLowerCase();
+    const search = searchQuery.toLowerCase();
+    return title.includes(search) || description.includes(search);
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -76,6 +85,16 @@ const Admin: React.FC = () => {
   return (
     <div>
       <h1 className="font-pixel-2xl text-accent-primary-bright mb-8 crt-glow">ADMIN PANEL</h1>
+
+      <div className="mb-6">
+        <RetroInput
+          placeholder={t('search.placeholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
+
       <div className="section-divider"></div>
 
       <div className="flex gap-2 mb-6" dir={language === 'ar' ? 'rtl' : 'ltr'}>
@@ -83,11 +102,10 @@ const Admin: React.FC = () => {
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-2 font-pixel text-xs transition-all rounded ${
-              filter === f
-                ? 'bg-accent-primary/20 border border-accent-primary text-accent-primary-bright'
-                : 'bg-bg-secondary border border-border-color text-text-primary hover:border-accent-primary'
-            }`}
+            className={`px-4 py-2 font-pixel text-xs transition-all rounded ${filter === f
+              ? 'bg-accent-primary/20 border border-accent-primary text-accent-primary-bright'
+              : 'bg-bg-secondary border border-border-color text-text-primary hover:border-accent-primary'
+              }`}
           >
             {f.toUpperCase()}
           </button>
@@ -95,10 +113,10 @@ const Admin: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        {games.map((game) => {
+        {filteredGames.map((game) => {
           const title = language === 'ar' ? game.title_ar : game.title;
           const description = language === 'ar' ? game.description_ar : game.description;
-          
+
           return (
             <div
               key={game.id}
@@ -128,11 +146,10 @@ const Admin: React.FC = () => {
                   )}
                 </div>
                 <div className="flex flex-col gap-2 min-w-[200px]" style={{ marginLeft: language === 'ar' ? '0' : '1rem', marginRight: language === 'ar' ? '1rem' : '0' }}>
-                  <span className={`px-3 py-1 font-pixel text-xs text-center rounded ${
-                    game.status === 'approved' ? 'bg-success/20 text-success border border-success' :
+                  <span className={`px-3 py-1 font-pixel text-xs text-center rounded ${game.status === 'approved' ? 'bg-success/20 text-success border border-success' :
                     game.status === 'pending' ? 'bg-warning/20 text-warning border border-warning' :
-                    'bg-error/20 text-error border border-error'
-                  }`}>
+                      'bg-error/20 text-error border border-error'
+                    }`}>
                     {game.status.toUpperCase()}
                   </span>
                   {game.status === 'pending' && (
@@ -194,7 +211,7 @@ const Admin: React.FC = () => {
         })}
       </div>
 
-      {games.length === 0 && (
+      {filteredGames.length === 0 && (
         <div className="text-center py-16">
           <div className="font-pixel text-text-secondary mb-4">NO GAMES FOUND</div>
         </div>

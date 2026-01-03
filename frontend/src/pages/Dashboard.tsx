@@ -18,6 +18,7 @@ const Dashboard: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [existingScreenshots, setExistingScreenshots] = useState<Screenshot[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -224,6 +225,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const filteredGames = games.filter(game => {
+    const title = (language === 'ar' ? game.title_ar : game.title).toLowerCase();
+    const description = (language === 'ar' ? game.description_ar : game.description).toLowerCase();
+    const search = searchQuery.toLowerCase();
+    return title.includes(search) || description.includes(search);
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -263,6 +271,15 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="section-divider"></div>
+
+      <div className="mb-8">
+        <RetroInput
+          placeholder={t('search.placeholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
 
       {showForm && (
         <div className="bg-bg-secondary pixel-border p-8 mb-8">
@@ -415,7 +432,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {games.map((game) => {
+        {filteredGames.map((game) => {
           const title = language === 'ar' ? game.title_ar : game.title;
           return (
             <div
@@ -472,7 +489,7 @@ const Dashboard: React.FC = () => {
         })}
       </div>
 
-      {games.length === 0 && (
+      {filteredGames.length === 0 && (
         <div className="text-center py-16">
           <div className="font-pixel text-text-secondary mb-4">NO GAMES SUBMITTED YET</div>
         </div>
