@@ -180,6 +180,36 @@ class ScreenshotViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
+class ScreenshotListView(viewsets.ReadOnlyModelViewSet):
+    """
+    Public read-only view for listing screenshots.
+    Only returns screenshots for approved games for public users.
+    """
+    queryset = Screenshot.objects.all().order_by('-uploaded_at')
+    serializer_class = ScreenshotSerializer
+    permission_classes = []  # Allow any
+
+    def get_queryset(self):
+        qs = Screenshot.objects.all().order_by('-uploaded_at')
+        game_id = self.request.query_params.get('game')
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+
+        user = self.request.user
+        # Admin/Developer can see their own screenshots already via main viewset
+        # But for this list, we filter to approved games unless they are owners/admins
+        if (
+            user
+            and user.is_authenticated
+            and getattr(user, 'role', None) in ['admin', 'developer']
+        ):
+            # For admin/dev just return the filtered qs
+            return qs
+
+        # Public users see only screenshots of approved games
+        return qs.filter(game__status='approved')
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing game reviews (owner/admin operations).
