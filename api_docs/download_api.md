@@ -19,6 +19,7 @@ The Downloads API provides two related capabilities:
 
 Router registrations exposed by the app:
 - `downloads` — full list/create/retrieve/delete for `DownloadHistory` (registered with DefaultRouter at `/api/downloads/downloads/`).
+- `popular-games` — read-only list for popular games (registered with DefaultRouter at `/api/downloads/popular-games/`).
 
 Protected file download endpoint (manual route):
 - `GET /api/downloads/games/<int:game_id>/download/` — streams the game's file if the requester is authorized and the file exists.
@@ -97,6 +98,12 @@ Implementation notes:
 - Behavior: streams the game's file as an attachment when allowed and logs the download in `DownloadHistory`.
 - Response: 200 with file stream, or 403/404 as appropriate.
 
+6) List Popular Games
+
+- URL: `GET /api/downloads/popular-games/`
+- Permission: AllowAny (public)
+- Response (200 OK): array of game objects sorted by download count (descending). Use `download_count` field in standard Game object serialization.
+
 ---
 
 ## curl Examples
@@ -157,7 +164,15 @@ curl -i -L -X GET http://127.0.0.1:8000/api/downloads/games/<GAME_ID>/download/
 
 Expected: HTTP 401 or 403 and no `user` set on any created DownloadHistory row.
 
-### 7) Verify logging via admin
+### 7) List popular games (public)
+
+```bash
+curl -i -X GET http://127.0.0.1:8000/api/downloads/popular-games/
+```
+
+Expected: HTTP 200 with array of games sorted by popularity.
+
+### 8) Verify logging via admin
 
 ```bash
 ADMIN_TOKEN=$(curl -s -X POST http://127.0.0.1:8000/api/users/login/ \

@@ -30,6 +30,7 @@ Game fields (exposed by `GameSerializer`):
   Use `category_ids` (array of integers or repeated form fields) in write requests to assign one or more categories.
 - `rejection_reason` (string) — optional
 - `created_at` / `updated_at` (timestamps)
+- `download_count` (integer) — read-only
 
 ---
 
