@@ -139,12 +139,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
           ) : (
             <div className="space-y-2 border-t-2 border-border-color pt-4">
-              <Link to="/login">
+              <Link to="/login" className="block">
                 <RetroButton variant="secondary" className="w-full">
                   {t('nav.login')}
                 </RetroButton>
               </Link>
-              <Link to="/register">
+              <Link to="/register" className="block">
                 <RetroButton variant="primary" className="w-full">
                   {t('nav.register')}
                 </RetroButton>
