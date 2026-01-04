@@ -1,0 +1,9 @@
+backend/db.sqlite3
+backend/media/
+**/__pycache__/
+*.pyc
+node_modules/
+dist/
+build/
+.env
+.DS_Store
