@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { gamesAPI, categoriesAPI, screenshotsAPI, BACKEND_URL } from '../services/api';
+import { gamesAPI, categoriesAPI, screenshotsAPI, BACKEND_URL, analyticsAPI } from '../services/api';
 import type { Game, Category, Screenshot } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -20,6 +20,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [existingScreenshots, setExistingScreenshots] = useState<Screenshot[]>([]);
+  const [analyticsOpen, setAnalyticsOpen] = useState<Record<number, boolean>>({});
+  const [analyticsData, setAnalyticsData] = useState<Record<number, any>>({});
   const [formData, setFormData] = useState({
     title: '',
     title_ar: '',
@@ -113,6 +115,19 @@ const Dashboard: React.FC = () => {
       } catch (error) {
         alert('FAILED TO DELETE SCREENSHOT');
       }
+    }
+  };
+
+  const fetchAnalyticsForGame = async (gameId: number) => {
+    try {
+      const [downloads, avgRatings, distribution] = await Promise.all([
+        analyticsAPI.getDownloads({ game: gameId, interval: 'daily' }),
+        analyticsAPI.getAvgRatings({ game: gameId, interval: 'daily' }),
+        analyticsAPI.getRatingDistribution({ game: gameId }),
+      ]);
+      setAnalyticsData(prev => ({ ...prev, [gameId]: { downloads, avgRatings, distribution } }));
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error);
     }
   };
 
@@ -483,7 +498,89 @@ const Dashboard: React.FC = () => {
                     DELETE
                   </RetroButton>
                 )}
+                <RetroButton
+                  onClick={async () => {
+                    // toggle analytics panel
+                    const currentlyOpen = analyticsOpen[game.id];
+                    if (!currentlyOpen) {
+                      await fetchAnalyticsForGame(game.id);
+                    }
+                    setAnalyticsOpen(prev => ({ ...prev, [game.id]: !currentlyOpen }));
+                  }}
+                  variant="secondary"
+                >
+                  ANALYTICS
+                </RetroButton>
               </div>
+              {analyticsOpen[game.id] && (
+                <div className="mt-4 bg-bg-tertiary p-4 rounded border border-border-color">
+                  {/* Downloads over time */}
+                  <div className="mb-4">
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Downloads (daily)</h4>
+                    {analyticsData[game.id]?.downloads?.length ? (
+                      <div className="space-y-1">
+                        {analyticsData[game.id].downloads.map((d: any) => {
+                          const max = Math.max(...analyticsData[game.id].downloads.map((x: any) => x.count), 1);
+                          const width = Math.round((d.count / max) * 100);
+                          return (
+                            <div key={d.period} className="flex items-center gap-2">
+                              <div className="text-[10px] text-text-muted w-24">{d.period}</div>
+                              <div className="bg-accent-primary/40 h-3 rounded" style={{ width: `${width}%` }} />
+                              <div className="text-xs text-text-primary ml-2">{d.count}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-text-muted">No download data</div>
+                    )}
+                  </div>
+
+                  {/* Average rating over time */}
+                  <div className="mb-4">
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Average rating (daily)</h4>
+                    {analyticsData[game.id]?.avgRatings?.length ? (
+                      <div className="space-y-1">
+                        {analyticsData[game.id].avgRatings.map((r: any) => (
+                          <div key={r.period} className="flex items-center gap-2">
+                            <div className="text-[10px] text-text-muted w-24">{r.period}</div>
+                            <div className="flex-1 bg-bg-secondary h-3 rounded relative">
+                              <div className="bg-accent-primary h-3 rounded" style={{ width: `${(r.average / 5) * 100}%` }} />
+                            </div>
+                            <div className="text-xs text-text-primary ml-2">{r.average.toFixed(2)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-text-muted">No rating data</div>
+                    )}
+                  </div>
+
+                  {/* Rating distribution */}
+                  <div>
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Rating distribution</h4>
+                    {analyticsData[game.id]?.distribution ? (
+                      <div className="space-y-1">
+                        {Object.entries(analyticsData[game.id].distribution.distribution || {}).map(([star, count]: any) => {
+                          const max = Math.max(...Object.values(analyticsData[game.id].distribution.distribution || {}), 1);
+                          const width = Math.round((count / max) * 100);
+                          return (
+                            <div key={star} className="flex items-center gap-2">
+                              <div className="text-[10px] text-text-muted w-12">{star}★</div>
+                              <div className="bg-bg-secondary h-3 rounded flex-1">
+                                <div className="bg-accent-primary h-3 rounded" style={{ width: `${width}%` }} />
+                              </div>
+                              <div className="text-xs text-text-primary ml-2">{count}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-text-muted">No distribution data</div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}

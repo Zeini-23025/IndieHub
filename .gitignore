@@ -7,3 +7,7 @@ dist/
 build/
 .env
 .DS_Store
+.vscode/
+.idea/
+*.log
+/images/

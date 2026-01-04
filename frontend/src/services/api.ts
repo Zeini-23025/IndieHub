@@ -205,5 +205,21 @@ export const downloadsAPI = {
   },
 };
 
+// Analytics API
+export const analyticsAPI = {
+  getDownloads: async (params: Record<string, unknown>) => {
+    const response = await api.get('/games/analytics/downloads/', { params });
+    return response.data;
+  },
+  getAvgRatings: async (params: Record<string, unknown>) => {
+    const response = await api.get('/games/analytics/ratings/average/', { params });
+    return response.data;
+  },
+  getRatingDistribution: async (params: Record<string, unknown>) => {
+    const response = await api.get('/games/analytics/ratings/distribution/', { params });
+    return response.data;
+  },
+};
+
 export default api;
 

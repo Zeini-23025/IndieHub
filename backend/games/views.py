@@ -7,6 +7,15 @@ from .serializers import (
     CategorySerializer, GameSerializer, ScreenshotSerializer, ReviewSerializer
     )
 from users.permissions import IsAdminUser, IsAdminOrDeveloper, IsOwnerOrAdmin
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.response import Response
+from django.db.models import Count, Avg
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
+from downloads.models import DownloadHistory
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -263,3 +272,159 @@ class ReviewListView(viewsets.ReadOnlyModelViewSet):
         if game_id:
             qs = qs.filter(game_id=game_id)
         return qs
+
+
+class AnalyticsDownloadsView(APIView):
+    """Return download counts over time.
+
+    Query params:
+      - game: optional game id to filter
+      - developer: optional developer id to filter (admin only)
+      - interval: daily|weekly|monthly (default: daily)
+      - start, end: ISO dates (YYYY-MM-DD)
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        interval = request.query_params.get('interval', 'daily')
+        game_id = request.query_params.get('game')
+        developer_id = request.query_params.get('developer')
+
+        # Build base queryset
+        qs = DownloadHistory.objects.all()
+
+        # Apply filters
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        if developer_id:
+            # only admin may filter by developer
+            if not getattr(user, 'role', None) == 'admin':
+                return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+            qs = qs.filter(game__developer_id=developer_id)
+
+        # Developers may only see their own games
+        if getattr(user, 'role', None) == 'developer' and not getattr(user, 'is_staff', False):
+            qs = qs.filter(game__developer=user)
+
+        # Date range
+        start = request.query_params.get('start')
+        end = request.query_params.get('end')
+        try:
+            if start:
+                start_dt = timezone.make_aware(datetime.strptime(start, '%Y-%m-%d'))
+                qs = qs.filter(timestamp__gte=start_dt)
+            if end:
+                end_dt = timezone.make_aware(datetime.strptime(end, '%Y-%m-%d')) + timedelta(days=1)
+                qs = qs.filter(timestamp__lt=end_dt)
+        except Exception:
+            return Response({'detail': 'Invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Grouping
+        if interval == 'weekly':
+            trunc = TruncWeek('timestamp')
+        elif interval == 'monthly':
+            trunc = TruncMonth('timestamp')
+        else:
+            trunc = TruncDay('timestamp')
+
+        data = (
+            qs.annotate(period=trunc)
+            .values('period')
+            .annotate(count=Count('id'))
+            .order_by('period')
+        )
+
+        # Serialize period to ISO date strings
+        result = [{'period': item['period'].date().isoformat() if item['period'] else None, 'count': item['count']} for item in data]
+        return Response(result)
+
+
+class AnalyticsAvgRatingView(APIView):
+    """Return average rating over time."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        interval = request.query_params.get('interval', 'daily')
+        game_id = request.query_params.get('game')
+        developer_id = request.query_params.get('developer')
+
+        qs = Review.objects.all()
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        if developer_id:
+            if not getattr(user, 'role', None) == 'admin':
+                return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+            qs = qs.filter(game__developer_id=developer_id)
+        if getattr(user, 'role', None) == 'developer':
+            qs = qs.filter(game__developer=user)
+
+        start = request.query_params.get('start')
+        end = request.query_params.get('end')
+        try:
+            if start:
+                start_dt = timezone.make_aware(datetime.strptime(start, '%Y-%m-%d'))
+                qs = qs.filter(created_at__gte=start_dt)
+            if end:
+                end_dt = timezone.make_aware(datetime.strptime(end, '%Y-%m-%d')) + timedelta(days=1)
+                qs = qs.filter(created_at__lt=end_dt)
+        except Exception:
+            return Response({'detail': 'Invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if interval == 'weekly':
+            trunc = TruncWeek('created_at')
+        elif interval == 'monthly':
+            trunc = TruncMonth('created_at')
+        else:
+            trunc = TruncDay('created_at')
+
+        data = (
+            qs.annotate(period=trunc)
+            .values('period')
+            .annotate(avg_rating=Avg('rating'), count=Count('id'))
+            .order_by('period')
+        )
+
+        result = [{'period': item['period'].date().isoformat() if item['period'] else None, 'average': float(item['avg_rating'] or 0), 'count': item['count']} for item in data]
+        return Response(result)
+
+
+class AnalyticsRatingDistributionView(APIView):
+    """Return rating distribution counts 1..5."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        game_id = request.query_params.get('game')
+        developer_id = request.query_params.get('developer')
+
+        qs = Review.objects.all()
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        if developer_id:
+            if not getattr(user, 'role', None) == 'admin':
+                return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+            qs = qs.filter(game__developer_id=developer_id)
+        if getattr(user, 'role', None) == 'developer':
+            qs = qs.filter(game__developer=user)
+
+        start = request.query_params.get('start')
+        end = request.query_params.get('end')
+        try:
+            if start:
+                start_dt = timezone.make_aware(datetime.strptime(start, '%Y-%m-%d'))
+                qs = qs.filter(created_at__gte=start_dt)
+            if end:
+                end_dt = timezone.make_aware(datetime.strptime(end, '%Y-%m-%d')) + timedelta(days=1)
+                qs = qs.filter(created_at__lt=end_dt)
+        except Exception:
+            return Response({'detail': 'Invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        agg = qs.values('rating').annotate(count=Count('id'))
+        # Build distribution for 1..5
+        distribution = {str(i): 0 for i in range(1, 6)}
+        for item in agg:
+            distribution[str(item['rating'])] = item['count']
+
+        return Response({'distribution': distribution})
