@@ -81,7 +81,7 @@ const Games: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="font-pixel-2xl text-accent-primary-bright mb-4 crt-glow">
-          {t('nav.library')}
+          {t('nav.games')}
         </h1>
         <div className="section-divider"></div>
       </div>
