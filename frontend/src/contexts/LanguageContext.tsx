@@ -56,6 +56,10 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.categories': 'Filter by Category',
     'library.empty': 'Your library is empty',
     'library.addGames': 'Add games to your library to access them quickly',
+    'notFound.sector': 'SECTOR NOT FOUND',
+    'notFound.coordinates': 'System failure: Coordinates invalid...',
+    'notFound.void': "The neural link has been severed. You've wandered into the digital void.",
+    'notFound.return': 'INITIATE RETURN SEQUENCE',
   },
   ar: {
     'app.name': 'إندي هاب',
@@ -103,6 +107,10 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.categories': 'تصفية حسب الفئة',
     'library.empty': 'مكتبتك فارغة',
     'library.addGames': 'أضف الألعاب إلى مكتبتك للوصول إليها بسرعة',
+    'notFound.sector': 'القطاع غير موجود',
+    'notFound.coordinates': 'فشل النظام: الإحداثيات غير صالحة...',
+    'notFound.void': 'تم قطع الرابط العصبي. لقد تجولت في الفراغ الرقمي.',
+    'notFound.return': 'بدء تسلسل العودة',
   },
 };
 

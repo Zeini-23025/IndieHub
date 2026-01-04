@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Layout from './components/Layout';
@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
 import Admin from './pages/Admin';
 import CategoryManagement from './pages/CategoryManagement';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/categories" element={<CategoryManagement />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
         </AuthProvider>
