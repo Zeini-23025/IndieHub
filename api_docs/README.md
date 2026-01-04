@@ -63,6 +63,7 @@ Note: `user` is set from the auth token automatically; do not include it in POST
 |-------:|-----------------------------------------------|----------------------------------------------------|
 | POST   | `/api/downloads/downloads/`                   | Create a download history record (anonymous or auth) |
 | GET    | `/api/downloads/downloads/`                   | List download records (admin only)                 |
+| GET    | `/api/downloads/popular-games/`               | List most popular games (by download count)        |
 | GET    | `/api/downloads/games/{game_id}/download/`    | Protected game download (streams file; auth req)   |
 
 Rule: download allowed if the game is `approved`, or if the requester is the game's developer or an admin. Server logs `ip_address` and `device_info`.

@@ -2,65 +2,72 @@
 
 A web application that centralizes independent games and promotes developers from underrepresented communities. IndieHub provides a validation system to ensure cultural, ethical, and religious compliance while offering a modern interface for browsing, submitting, and downloading games.
 
+---
+
 ## 🎮 Features
 
 - **Game Submission**: Independent developers can submit their games for validation
 - **Content Validation**: Admin system to verify games meet quality and cultural standards
 - **Game Browser**: Users can search, filter, and download validated games
+- **Most Popular Games**: Automatically tracks downloads to showcase trending games
 - **Developer Dashboard**: Track game submission status and manage uploaded games
 - **User Accounts**: Personal library and download history for registered users
 - **Library Management**: Users can manage their personal collection of games
-- **Admin Panel**: Manage users, validate submissions, and oversee content
-- **Bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR)
+- **bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR)
+- **Reviews**: Community-driven rating and review system
 
 ## 📋 User Roles
 
 - **Administrator**: Validate games, manage users, handle content compliance
 - **Developer**: Submit games, track status, update submissions
-- **User**: Browse and download games (with optional account features)
+- **User**: Browse, review, and download games (with optional account features)
+
+---
 
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Django** - REST API framework
-- **Django REST Framework** - API development
-- **Django CORS Headers** - Cross-origin resource sharing
-- **SQLite** - Database (development)
+- **Django** - High-level Python Web Framework
+- **Django REST Framework** - Toolkit for building Web APIs
+- **Django CORS Headers** - Cross-origin resource sharing management
+- **SQLite** - Lightweight database for development
 
 ### Frontend
-- **React** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Axios** - HTTP client
+- **React** - Library for building user interfaces
+- **TypeScript** - Strongly typed JavaScript
+- **Vite** - Next Generation Frontend Tooling
+- **Axios** - Promise based HTTP client
+
+---
 
 ## 📦 Prerequisites
 
-- Python 3.9+
-- Node.js 16+
-- npm or yarn
+- **Python**: 3.9+
+- **Node.js**: 16+
+- **npm** or **yarn**
+
+---
 
 ## 🚀 Installation & Setup
 
-### Backend Setup
-```bash
+### 1. Backend Setup
 
+```bash
+cd backend
+
+# Create virtual environment
 python -m venv venv
-# mac/linux
+
+# Activate virtual environment
+# On Linux/tvOS:
 source venv/bin/activate
-# windows
+# On Windows:
 venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-```
-
-
-```bash
-
-cd backend
-
-# Run migrations
+# Run database migrations
 python manage.py migrate
 
 # Create superuser (for admin access)
@@ -72,7 +79,7 @@ python manage.py runserver
 
 The API will be available at `http://localhost:8000`
 
-### Frontend Setup
+### 2. Frontend Setup
 
 ```bash
 cd frontend
@@ -86,19 +93,7 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
-## 📝 Available Scripts
-
-### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
-
-### Backend
-- `python manage.py migrate` - Apply database migrations
-- `python manage.py createsuperuser` - Create admin user
-- `python manage.py runserver` - Start development server
-- `python manage.py test` - Run tests
+---
 
 ## 📁 Project Structure
 
@@ -112,32 +107,27 @@ IndieHub/
 │   │   ├── views.py         # API views & viewsets
 │   │   └── urls.py          # App-specific routes
 │   ├── users/               # User management & Auth
-│   │   ├── models.py        # Custom User model
-│   │   ├── views.py         # Login/Register views
-│   │   └── permissions.py   # Custom permissions (IsAdmin, IsDeveloper)
 │   ├── library/             # User library (purchased/added games)
-│   │   ├── models.py        # LibraryEntry model
-│   │   ├── serializers.py   # LibraryEntrySerializer
-│   │   ├── views.py         # LibraryEntryViewSet
-│   │   └── urls.py          # Library routes
 │   ├── downloads/           # Download tracking & history
 │   ├── backend/             # Project settings (settings.py, etc.)
 │   └── manage.py            # Django management script
 ├── frontend/                # React + TypeScript Client
 │   ├── src/                 # Source code
-│   │   ├── assets/          # Images & global styles
-│   │   ├── App.tsx          # Main application component
-│   │   └── main.tsx         # Entry point
-│   ├── public/              # Static assets (favicons, etc.)
-│   ├── index.html           # HTML entry point
-│   ├── package.json         # NPM dependencies
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Application pages
+│   │   ├── services/        # API service calls
+│   │   └── contexts/        # React contexts (Language, Auth)
+│   ├── public/              # Static assets
 │   └── vite.config.ts       # Vite configuration
+├── api_docs/                # Detailed API Documentation
 └── README.md
 ```
 
+---
+
 ## 🔌 API Endpoints
 
-Base URL: `http://localhost:8000/api/`
+**Base URL**: `http://localhost:8000/api/`
 
 ### Authentication & Users
 - `POST /users/login/` - Authenticate & get token
@@ -150,47 +140,51 @@ Base URL: `http://localhost:8000/api/`
 - `POST /games/games/` - Submit a new game (Developer)
 - `PATCH /games/games/{id}/` - Update game or Approve/Reject (Admin)
 
-### Categories
-- `GET /games/categories-list/` - List all categories
-
-### Library
-- `GET /library/entries/` - List user's library entries
-- `POST /library/entries/` - Add game to library
-- `GET /library/entries/{id}/` - Retrieve library entry
-- `DELETE /library/entries/{id}/` - Remove game from library
-
-### Downloads
-- `POST /downloads/downloads/` - Create a download history record (anonymous or authenticated)
-- `GET /downloads/downloads/` - List download history records (Admin only)
-- `GET /downloads/games/{game_id}/download/` - Protected game download (streams file; auth required)
-
-### Screenshots
-- `GET /games/screenshots/` - List screenshots (public)
-- `GET /games/screenshots/{id}/` - Retrieve a screenshot
-- `POST /games/screenshots/` - Upload a screenshot (game developer/owner or admin)
-- `PATCH /games/screenshots/{id}/` - Update screenshot (owner or admin)
-- `DELETE /games/screenshots/{id}/` - Delete screenshot (owner or admin)
+### Downloads & Popularity
+- `GET /downloads/popular-games/` - Get list of most locally popular games
+- `GET /downloads/games/{game_id}/download/` - Download game file (Authenticated)
+- `POST /downloads/downloads/` - Log a download manually (Backend utility)
 
 ### Reviews
+- `GET /games/reviews-list/` - List all reviews
+- `POST /games/reviews/` - Add a review
+- `PATCH /games/reviews/{id}/` - Update your review
 
-- `GET /games/reviews-list/` - Public list of reviews (filter with `?game=<id>`)
-- `GET /games/reviews-list/{id}/` - Retrieve a single review (public)
-- `POST /games/reviews/` - Create a review (authenticated users only; rating 1..5)
-- `PATCH /games/reviews/{id}/` - Update a review (owner or admin)
-- `DELETE /games/reviews/{id}/` - Delete a review (owner or admin)
+*For detailed API documentation, please refer to the `api_docs/` directory.*
 
-Notes: each user may submit at most one review per game (unique constraint). The `user` field is set from the auth token and is read-only on create.
+---
+
+## 📝 Available Scripts
+
+### Frontend
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint checkout
+
+### Backend
+- `python manage.py migrate` - Apply database migrations
+- `python manage.py createsuperuser` - Create admin user
+- `python manage.py runserver` - Start development server
+- `python manage.py test` - Run tests
+
+---
 
 ## 🤝 Contributing
 
-1. Create a feature branch
-2. Make your changes
-3. Test thoroughly
-4. Submit a pull request
+1. **Fork** the repository
+2. **Clone** your fork (`git clone ...`)
+3. Create a **Feature Branch** (`git checkout -b feature/MyFeature`)
+4. **Commit** your changes (`git commit -m 'Add some feature'`)
+5. **Push** to the branch (`git push origin feature/MyFeature`)
+6. Open a **Pull Request**
+
+---
 
 ## 📄 License
 
-This project is part of the IndieHub initiative to support independent developers.
+This project is part of the IndieHub initiative to support independent developers. All rights reserved.
+
+---
 
 ## 🙏 Support
 
