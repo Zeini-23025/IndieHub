@@ -95,7 +95,47 @@ The application will be available at `http://localhost:5173`
 
 ---
 
-## 📁 Project Structure
+##  Run with Docker
+
+You can run the whole project (backend + frontend) using Docker and the included Compose file. From the repository root:
+
+```bash
+# Build images and start services (foreground, shows logs)
+docker compose up --build
+
+# Or run in background (detached)
+docker compose up --build -d
+
+# View logs for all services
+docker compose logs -f
+
+# Rebuild only one service (e.g. frontend) and restart it
+docker compose build --no-cache frontend
+docker compose up -d frontend
+```
+
+Ports used by the Compose setup:
+- Frontend: http://localhost:80
+- Backend (API): http://localhost:8000
+
+Notes & troubleshooting
+- If you see large build contexts or tar errors, ensure `.dockerignore` excludes `backend/media` and large files (the repo includes a `.dockerignore`).
+- If your frontend shows CORS errors, prefer using relative API paths (e.g. Axios baseURL `/api`) or proxy `/api` via nginx. The development settings enable CORS when `DEBUG=True`.
+- To run management commands inside the backend container:
+
+```bash
+# open a shell in the running backend container
+docker compose exec backend sh
+
+# run migrations or populate DB
+docker compose exec backend python manage.py migrate --noinput
+docker compose exec backend python manage.py populate_db
+```
+
+If you prefer local development without Docker, follow the steps in the "Installation & Setup" section above.
+
+
+##�📁 Project Structure
 
 ```
 IndieHub/

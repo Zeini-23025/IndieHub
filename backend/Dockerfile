@@ -21,4 +21,10 @@ COPY . .
 
 EXPOSE 8000
 
+# Make sure the entrypoint script (created below) is executable and use it to run
+# migrations, populate the DB, then exec the main CMD (gunicorn).
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
+
 CMD ["gunicorn", "backend.wsgi:application", "--bind", "0.0.0.0:8000"]

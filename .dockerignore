@@ -1,0 +1,17 @@
+# Ignore common files that should not be sent to the Docker daemon
+**/.git
+**/.git/**
+**/node_modules
+**/node_modules/**
+**/dist
+**/build
+**/*.log
+
+# Ignore backend media, DB and virtual envs to avoid huge build context
+/backend/media
+/backend/db.sqlite3
+
+# Ignore IDE/editor settings
+*.swp
+.vscode
+.idea

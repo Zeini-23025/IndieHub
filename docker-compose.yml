@@ -1,0 +1,19 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: indiehub_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    # If you use a separate DB service, you can add depends_on here.
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: indiehub_frontend
+    ports:
+      - "80:80"
+
+# You can add volumes / networks / a DB service here as needed.
