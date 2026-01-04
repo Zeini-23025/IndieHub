@@ -55,6 +55,10 @@ class Command(BaseCommand):
 
         # 2. Create Categories
         self.stdout.write('Creating categories...')
+
+        # A full list of categories (name, description, name_ar, description_ar).
+        # This mirrors how `game_titles` is defined above and makes the
+        # seeding deterministic and easy to review.
         categories_data = [
             ('Action', 'High octane action games', 'أكشن', 'ألعاب حركة وإثارة'),
             ('Adventure', 'Explore new worlds', 'مغامرة', 'استكشاف عوالم جديدة'),
@@ -64,6 +68,28 @@ class Command(BaseCommand):
             ('Horror', 'Scary experiences', 'رعب', 'تجارب مخيفة'),
             ('Simulation', 'Realistic simulations', 'محاكاة', 'محاكاة واقعية'),
             ('Sports', 'Competitive sports games', 'رياضة', 'ألعاب رياضية تنافسية'),
+            # entries from categories.json
+            ('Clicker', 'Games focused on repeated clicking or incremental progress.', 'نقر', 'ألعاب تعتمد على النقر المتكرر أو التقدم التدريجي.'),
+            ('Cute', 'Games with adorable visuals and characters.', 'لطيف', 'ألعاب تتميز برسومات وشخصيات لطيفة.'),
+            ('Psychological Horror', 'Horror games focused on mental and emotional fear.', 'رعب نفسي', 'ألعاب رعب تعتمد على التوتر النفسي والعقلي.'),
+            ('RPG Maker', 'Games created using RPG Maker engine.', 'صانع ألعاب RPG', 'ألعاب تم تطويرها باستخدام محرك RPG Maker.'),
+            ('Short', 'Games with a short playtime experience.', 'قصير', 'ألعاب يمكن إنهاؤها في وقت لعب قصير.'),
+            ('2D', 'Games with two-dimensional graphics.', 'ثنائي الأبعاد', 'ألعاب برسومات ثنائية الأبعاد.'),
+            ('3D', 'Games with three-dimensional graphics.', 'ثلاثي الأبعاد', 'ألعاب برسومات ثلاثية الأبعاد.'),
+            ('Singleplayer', 'Games designed for one player.', 'لاعب واحد', 'ألعاب مخصصة للعب الفردي.'),
+            ('First-Person', 'Games played from the character\'s point of view.', 'منظور الشخص الأول', 'ألعاب تُلعب من منظور عين الشخصية.'),
+            ('Tamagotchi', 'Virtual pet care and life simulation games.', 'حيوان أليف افتراضي', 'ألعاب تعتمد على رعاية كائن افتراضي.'),
+            ('Furry', 'Games featuring anthropomorphic animal characters.', 'شخصيات حيوانية', 'ألعاب تحتوي على شخصيات حيوانية بشرية الصفات.'),
+            ('Female Protagonist', 'Games with a female main character.', 'بطلة أنثى', 'ألعاب تكون فيها الشخصية الرئيسية أنثى.'),
+            ('Fast-Paced', 'Games with quick action and high speed gameplay.', 'سريع الوتيرة', 'ألعاب تعتمد على السرعة وردة الفعل السريعة.'),
+            ('Anime', 'Games inspired by anime art and style.', 'أنمي', 'ألعاب مستوحاة من أسلوب ورسومات الأنمي.'),
+            ('Girl', 'Games focused on female characters or themes.', 'فتيات', 'ألعاب تركز على شخصيات أو مواضيع نسائية.'),
+            ('Indie', 'Independently developed games.', 'مستقل', 'ألعاب تم تطويرها بشكل مستقل.'),
+            ('Casual', 'Easy to play and relaxing games.', 'خفيف', 'ألعاب بسيطة ومريحة.'),
+            ('Cult Classic', 'Games with a dedicated fanbase over time.', 'كلاسيكية محبوبة', 'ألعاب اكتسبت قاعدة جماهيرية مخلصة.'),
+            ('Open Source', 'Games with publicly available source code.', 'مفتوح المصدر', 'ألعاب يكون كودها البرمجي متاحًا للعامة.'),
+            ('Race', 'Games focused on racing competitions.', 'سباق', 'ألعاب تعتمد على سباقات تنافسية.'),
+            ('Monsters', 'Games featuring monsters or creatures.', 'وحوش', 'ألعاب تحتوي على وحوش أو مخلوقات خيالية.'),
         ]
 
         categories = []
