@@ -94,4 +94,3 @@ class PopularGamesViewSet(viewsets.ReadOnlyModelViewSet):
         return Game.objects.filter(status='approved').annotate(
             download_count=Count('downloads')
         ).order_by('-download_count')
-

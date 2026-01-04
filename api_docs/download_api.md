@@ -98,6 +98,35 @@ Implementation notes:
 - Behavior: streams the game's file as an attachment when allowed and logs the download in `DownloadHistory`.
 - Response: 200 with file stream, or 403/404 as appropriate.
 
+7) Game download statistics (new)
+
+- URL: `GET /api/downloads/games/<int:game_id>/stats/`
+- Permission: AllowAny (public)
+- Purpose: returns simple aggregated download metrics for a specific game. Useful for leaderboards or per-game public stats.
+- Query params (optional):
+  - `days` (integer) — how many days of daily data to include (default: 30)
+- Response (200 OK) example:
+
+```json
+{
+  "game": 12,
+  "total_downloads": 2345,
+  "last_30_days": 123,
+  "daily": [
+    { "date": "2025-12-06", "count": 3 },
+    { "date": "2025-12-07", "count": 7 },
+    {
+      "date": "2025-12-08",
+      "count": 2
+    }
+  ]
+}
+```
+
+Notes:
+- The `daily` array contains at most `days` entries (most recent first) and uses YYYY-MM-DD dates.
+- Implementations may cache this endpoint server-side for performance (e.g., 1–5 minute TTL).
+
 6) List Popular Games
 
 - URL: `GET /api/downloads/popular-games/`

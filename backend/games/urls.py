@@ -1,10 +1,13 @@
 from .views import (
     CategoryViewSet, CategoryListView,
-    GameViewSet, GameListView, ScreenshotViewSet, ScreenshotListView,
+    GameViewSet, GameListView,
+    ScreenshotViewSet, ScreenshotListView,
     ReviewViewSet, ReviewListView
     )
 from .views import (
-    AnalyticsDownloadsView, AnalyticsAvgRatingView, AnalyticsRatingDistributionView
+    AnalyticsDownloadsView,
+    AnalyticsAvgRatingView,
+    AnalyticsRatingDistributionView
 )
 from rest_framework.routers import DefaultRouter
 from django.urls import path
@@ -20,7 +23,19 @@ router.register(r'reviews-list', ReviewListView, basename='review-list')
 urlpatterns = router.urls
 
 urlpatterns += [
-    path('analytics/downloads/', AnalyticsDownloadsView.as_view(), name='analytics-downloads'),
-    path('analytics/ratings/average/', AnalyticsAvgRatingView.as_view(), name='analytics-ratings-average'),
-    path('analytics/ratings/distribution/', AnalyticsRatingDistributionView.as_view(), name='analytics-ratings-distribution'),
+    path(
+        'analytics/downloads/',
+        AnalyticsDownloadsView.as_view(),
+        name='analytics-downloads'
+        ),
+    path(
+        'analytics/ratings/average/',
+        AnalyticsAvgRatingView.as_view(),
+        name='analytics-ratings-average'
+        ),
+    path(
+        'analytics/ratings/distribution/',
+        AnalyticsRatingDistributionView.as_view(),
+        name='analytics-ratings-distribution'
+        ),
 ]

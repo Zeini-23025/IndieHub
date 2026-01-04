@@ -4,13 +4,14 @@ from rest_framework.exceptions import PermissionDenied
 from django.db.models import Q
 from .models import Category, Game, Screenshot, Review
 from .serializers import (
-    CategorySerializer, GameSerializer, ScreenshotSerializer, ReviewSerializer
+    CategorySerializer,
+    GameSerializer,
+    ScreenshotSerializer,
+    ReviewSerializer
     )
 from users.permissions import IsAdminUser, IsAdminOrDeveloper, IsOwnerOrAdmin
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from rest_framework.response import Response
 from django.db.models import Count, Avg
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth
 from downloads.models import DownloadHistory
