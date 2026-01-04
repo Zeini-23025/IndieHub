@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.http import FileResponse, Http404
 from games.models import Game
+from games.serializers import GameSerializer
+from django.db.models import Count
 import os
 
 
@@ -78,3 +80,18 @@ class DownloadGameView(APIView):
             filename=os.path.basename(file_path),
         )
         return response
+
+
+class PopularGamesViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint to list games sorted by popularity (download count).
+    Accessible by everyone.
+    """
+    permission_classes = [permissions.AllowAny]
+    serializer_class = GameSerializer
+
+    def get_queryset(self):
+        return Game.objects.filter(status='approved').annotate(
+            download_count=Count('downloads')
+        ).order_by('-download_count')
+

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { gamesAPI, screenshotsAPI, BACKEND_URL } from '../services/api';
+import { gamesAPI, screenshotsAPI, downloadsAPI, BACKEND_URL } from '../services/api';
 import type { Game, Screenshot } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Home: React.FC = () => {
   const { language, t } = useLanguage();
   const [games, setGames] = useState<Game[]>([]);
+  const [popularGames, setPopularGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [gameScreenshots, setGameScreenshots] = useState<Record<number, Screenshot[]>>({});
   const [hoveredGame, setHoveredGame] = useState<number | null>(null);
@@ -14,8 +15,12 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const gamesData = await gamesAPI.getGames();
+        const [gamesData, popularData] = await Promise.all([
+          gamesAPI.getGames(),
+          downloadsAPI.getPopularGames()
+        ]);
         setGames(gamesData);
+        setPopularGames(popularData.slice(0, 5));
 
         // Fetch screenshots for all games
         const screenshotPromises = gamesData.map(async (game) => {
@@ -56,7 +61,7 @@ const Home: React.FC = () => {
 
   const approvedGames = games.filter(g => g.status === 'approved');
   const featuredGame = approvedGames[0];
-  const popularGames = approvedGames.slice(0, 5);
+  // Popular games are now fetched from backend
   const newReleases = [...approvedGames].sort((a, b) =>
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   ).slice(0, 5);

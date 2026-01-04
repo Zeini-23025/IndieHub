@@ -199,6 +199,10 @@ export const downloadsAPI = {
     });
     return response.data;
   },
+  getPopularGames: async (): Promise<Game[]> => {
+    const response = await api.get('/downloads/popular-games/');
+    return response.data;
+  },
 };
 
 export default api;
