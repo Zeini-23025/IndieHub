@@ -108,7 +108,7 @@ const GameSection: React.FC<GameSectionProps> = ({ title, description, games, vi
                                     <h3 className="font-pixel text-xs text-accent-primary-bright mb-3">
                                         {gameTitle}
                                     </h3>
-                                    <p className="text-[10px] text-text-secondary mb-4 line-clamp-4 flex-1 leading-relaxed" dir={dir}>
+                                    <p className="text-[11px] text-text-primary mb-4 line-clamp-5 flex-1 leading-relaxed font-medium" dir={dir}>
                                         {gameDesc}
                                     </p>
 

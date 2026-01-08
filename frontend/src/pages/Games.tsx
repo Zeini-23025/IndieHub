@@ -174,7 +174,7 @@ const Games: React.FC = () => {
                   <h3 className="font-pixel text-xs text-accent-primary-bright mb-3">
                     {title}
                   </h3>
-                  <p className="text-sm text-text-secondary mb-4 line-clamp-4 flex-1 leading-relaxed" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                  <p className="text-[15px] text-text-primary mb-4 line-clamp-5 flex-1 leading-relaxed font-medium" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                     {description}
                   </p>
 
