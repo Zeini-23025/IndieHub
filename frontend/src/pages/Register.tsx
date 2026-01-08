@@ -15,7 +15,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -23,12 +23,12 @@ const Register: React.FC = () => {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('PASSWORDS DO NOT MATCH');
+      setError(t('auth.passMatch'));
       return;
     }
 
     if (password.length < 8) {
-      setError('PASSWORD MUST BE AT LEAST 8 CHARACTERS');
+      setError(t('auth.passLength'));
       return;
     }
 
@@ -38,7 +38,7 @@ const Register: React.FC = () => {
       await register(username, email, password, role);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.response?.data?.username?.[0] || 'REGISTRATION FAILED. PLEASE TRY AGAIN.');
+      setError(err.response?.data?.detail || err.response?.data?.username?.[0] || t('auth.regFailed'));
     } finally {
       setLoading(false);
     }
@@ -103,11 +103,11 @@ const Register: React.FC = () => {
             variant="primary"
             className="w-full"
           >
-            {loading ? 'REGISTERING...' : t('auth.register')}
+            {loading ? t('auth.registering').toUpperCase() : t('auth.register').toUpperCase()}
           </RetroButton>
         </form>
-        <p className="mt-6 text-center text-sm text-text-secondary">
-          ALREADY HAVE AN ACCOUNT?{' '}
+        <p className="mt-6 text-center text-sm text-text-secondary" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          {t('auth.hasAccount')}{' '}
           <Link to="/login" className="text-accent-primary-bright hover:text-accent-primary-bright underline">
             {t('auth.login')}
           </Link>

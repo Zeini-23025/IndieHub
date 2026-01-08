@@ -24,7 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary flex">
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-bg-secondary border-r border-border-color p-6 flex flex-col fixed h-screen z-50">
+      <aside className={`w-64 bg-bg-secondary border-e border-border-color p-6 flex flex-col fixed h-screen z-50 ${language === 'ar' ? 'right-0' : 'left-0'}`}>
         <Link to="/" className="mb-8">
           <h1 className="font-pixel-xl text-accent-primary-bright text-center crt-glow">
             {t('app.name')}
@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Link
             to="/"
             className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/')
-              ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+              ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
               : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
               }`}
           >
@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Link
             to="/games"
             className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/games')
-              ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+              ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
               : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
               }`}
           >
@@ -57,7 +57,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 to="/library"
                 className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/library')
-                  ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                  ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
                   : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
                   }`}
               >
@@ -67,7 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   to="/dashboard"
                   className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/dashboard')
-                    ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                    ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
                     : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
                     }`}
                 >
@@ -79,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Link
                     to="/admin"
                     className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/admin')
-                      ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                      ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
                       : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
                       }`}
                   >
@@ -88,7 +88,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Link
                     to="/admin/categories"
                     className={`block px-4 py-2.5 font-pixel text-xs transition-all rounded ${isActive('/admin/categories')
-                      ? 'bg-accent-primary/20 border-l-2 border-accent-primary text-accent-primary-bright'
+                      ? 'bg-accent-primary/20 border-s-2 border-accent-primary text-accent-primary-bright'
                       : 'hover:bg-bg-tertiary hover:text-accent-primary-bright text-text-secondary'
                       }`}
                   >

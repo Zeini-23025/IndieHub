@@ -27,6 +27,8 @@ const Library: React.FC = () => {
     }
     return `${BACKEND_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   };
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+
   const fetchLibrary = useCallback(async () => {
     if (!isAuthenticated) return;
 
@@ -70,6 +72,7 @@ const Library: React.FC = () => {
   const handleRemove = async (entryId: number) => {
     try {
       await libraryAPI.removeFromLibrary(entryId);
+      setConfirmingId(null);
       fetchLibrary();
     } catch (error) {
       console.error('Error removing from library:', error);
@@ -79,7 +82,7 @@ const Library: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="font-pixel text-accent-primary-bright animate-pulse">LOADING...</div>
+        <div className="font-pixel text-accent-primary-bright animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -96,7 +99,7 @@ const Library: React.FC = () => {
           <div className="font-pixel-xl text-text-secondary mb-4">{t('library.empty')}</div>
           <p className="text-text-muted font-mono text-sm mb-6">{t('library.addGames')}</p>
           <Link to="/games">
-            <RetroButton variant="primary">BROWSE GAMES</RetroButton>
+            <RetroButton variant="primary">{t('nav.games').toUpperCase()}</RetroButton>
           </Link>
         </div>
       ) : (
@@ -104,6 +107,7 @@ const Library: React.FC = () => {
           {libraryEntries.map((entry) => {
             const game = entry.game;
             const title = language === 'ar' ? game.title_ar : game.title;
+            const isConfirming = confirmingId === entry.id;
 
             return (
               <div
@@ -131,13 +135,37 @@ const Library: React.FC = () => {
                   </div>
                 </Link>
                 <div className="p-4 border-t-2 border-border-color">
-                  <RetroButton
-                    onClick={() => handleRemove(entry.id)}
-                    variant="danger"
-                    className="w-full"
-                  >
-                    {t('game.removeFromLibrary')}
-                  </RetroButton>
+                  {!isConfirming ? (
+                    <RetroButton
+                      onClick={() => setConfirmingId(entry.id)}
+                      variant="danger"
+                      className="w-full text-[10px]"
+                    >
+                      {t('game.removeFromLibrary')}
+                    </RetroButton>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="font-pixel text-[8px] text-error text-center mb-1 animate-pulse">
+                        {t('library.confirmRemove')}
+                      </p>
+                      <div className="flex gap-2">
+                        <RetroButton
+                          onClick={() => handleRemove(entry.id)}
+                          variant="danger"
+                          className="flex-1 text-[8px] py-1"
+                        >
+                          {t('common.confirm')}
+                        </RetroButton>
+                        <RetroButton
+                          onClick={() => setConfirmingId(null)}
+                          variant="secondary"
+                          className="flex-1 text-[8px] py-1 text-text-primary border-text-secondary"
+                        >
+                          {t('common.cancel')}
+                        </RetroButton>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

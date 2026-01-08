@@ -13,7 +13,7 @@ interface GameSectionProps {
 }
 
 const GameSection: React.FC<GameSectionProps> = ({ title, description, games, viewAllLink, dir }) => {
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const [hoveredGame, setHoveredGame] = useState<number | null>(null);
     const [gameScreenshots, setGameScreenshots] = useState<Record<number, Screenshot[]>>({});
 
@@ -62,7 +62,7 @@ const GameSection: React.FC<GameSectionProps> = ({ title, description, games, vi
                         to={viewAllLink}
                         className="text-accent-primary hover:text-accent-primary-bright font-pixel text-[10px] transition-all"
                     >
-                        {language === 'ar' ? 'عرض الكل' : 'VIEW ALL'} →
+                        {t('home.viewAll')} →
                     </Link>
                 )}
             </div>
@@ -72,7 +72,6 @@ const GameSection: React.FC<GameSectionProps> = ({ title, description, games, vi
                     const gameTitle = language === 'ar' ? game.title_ar : game.title;
                     const gameDesc = language === 'ar' ? game.description_ar : game.description;
                     const screenshots = gameScreenshots[game.id] || [];
-                    const baseScreenshot = screenshots.find(s => s.is_base) || { image_path: game.base_screenshot };
                     const previewScreenshots = screenshots.filter(s => !s.is_base).slice(0, 2);
                     const isHovered = hoveredGame === game.id;
 
@@ -139,7 +138,7 @@ const GameSection: React.FC<GameSectionProps> = ({ title, description, games, vi
 
                                     <Link to={`/games/${game.id}`}>
                                         <button className="w-full btn-retro text-[10px] py-2">
-                                            VIEW DETAILS
+                                            {t('game.viewDetails').toUpperCase()}
                                         </button>
                                     </Link>
                                 </div>

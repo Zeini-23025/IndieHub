@@ -12,7 +12,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -24,7 +24,7 @@ const Login: React.FC = () => {
       await login(username, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'LOGIN FAILED. PLEASE TRY AGAIN.');
+      setError(err.response?.data?.detail || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -62,11 +62,11 @@ const Login: React.FC = () => {
             variant="primary"
             className="w-full"
           >
-            {loading ? 'LOGGING IN...' : t('auth.login')}
+            {loading ? t('auth.loggingIn').toUpperCase() : t('auth.login').toUpperCase()}
           </RetroButton>
         </form>
-        <p className="mt-6 text-center text-sm text-text-secondary">
-          DON'T HAVE AN ACCOUNT?{' '}
+        <p className="mt-6 text-center text-sm text-text-secondary" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          {t('auth.noAccount')}{' '}
           <Link to="/register" className="text-accent-primary-bright hover:text-accent-primary-bright underline">
             {t('auth.register')}
           </Link>
