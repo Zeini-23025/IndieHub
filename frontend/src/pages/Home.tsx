@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { gamesAPI, screenshotsAPI, BACKEND_URL } from '../services/api';
-import type { Game, Screenshot, HomeSections } from '../services/api';
+import { gamesAPI, BACKEND_URL } from '../services/api';
+import type { Game, HomeSections } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 import GameSection from '../components/GameSection';
 
@@ -10,7 +10,6 @@ const Home: React.FC = () => {
   const [sections, setSections] = useState<HomeSections | null>(null);
   const [featuredGame, setFeaturedGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
-  const [featuredScreenshots, setFeaturedScreenshots] = useState<Screenshot[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,12 +24,6 @@ const Home: React.FC = () => {
 
         if (potentialFeatured) {
           setFeaturedGame(potentialFeatured);
-          try {
-            const screenshots = await screenshotsAPI.getScreenshots(potentialFeatured.id);
-            setFeaturedScreenshots(screenshots);
-          } catch (e) {
-            console.error('Error fetching featured screenshots:', e);
-          }
         }
       } catch (error) {
         console.error('Error fetching home sections:', error);
@@ -57,7 +50,7 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="font-pixel text-accent-primary-bright animate-pulse">LOADING...</div>
+        <div className="font-pixel text-accent-primary-bright animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -95,7 +88,7 @@ const Home: React.FC = () => {
               </p>
               <Link to={`/games/${featuredGame.id}`}>
                 <button className="btn-retro px-8 py-3">
-                  {language === 'ar' ? 'العب الآن' : 'PLAY NOW'}
+                  {t('game.playNow')}
                 </button>
               </Link>
             </div>
@@ -106,40 +99,40 @@ const Home: React.FC = () => {
       {sections && (
         <div className="max-w-7xl mx-auto px-4 space-y-16">
           <GameSection
-            title={language === 'ar' ? 'الأكثر شعبية' : 'Most Popular'}
-            description={language === 'ar' ? 'بناءً على عمليات التنزيل' : 'Based on downloads'}
+            title={t('home.popular')}
+            description={t('home.mostPopularDesc')}
             games={sections.most_popular}
             viewAllLink="/games?sort=popular"
             dir={direction}
           />
 
           <GameSection
-            title={language === 'ar' ? 'أحدث الإصدارات' : 'New Releases'}
-            description={language === 'ar' ? 'الألعاب المضافة حديثاً' : 'Recently added games'}
+            title={t('home.newReleases')}
+            description={t('home.newReleasesDesc')}
             games={sections.new_releases}
             viewAllLink="/games?sort=newest"
             dir={direction}
           />
 
           <GameSection
-            title={language === 'ar' ? 'الأعلى تقييماً' : 'Top Rated'}
-            description={language === 'ar' ? 'أفضل متوسط تقييم بالنجوم' : 'Best average star rating'}
+            title={t('home.topRated')}
+            description={t('home.topRatedDesc')}
             games={sections.top_rated}
             viewAllLink="/games?sort=top-rated"
             dir={direction}
           />
 
           <GameSection
-            title={language === 'ar' ? 'الرائج الآن' : 'Trending Now'}
-            description={language === 'ar' ? 'الأسرع نمواً في عمليات التنزيل هذا الأسبوع' : 'Fastest growing downloads this week'}
+            title={t('home.trending')}
+            description={t('home.trendingDesc')}
             games={sections.trending_now}
             viewAllLink="/games?sort=trending"
             dir={direction}
           />
 
           <GameSection
-            title={language === 'ar' ? 'جواهر خفية' : 'Hidden Gems'}
-            description={language === 'ar' ? 'تقييم عالي + تنزيلات منخفضة' : 'High rating + low downloads'}
+            title={t('home.gems')}
+            description={t('home.hiddenGemsDesc')}
             games={sections.hidden_gems}
             viewAllLink="/games?sort=gems"
             dir={direction}
@@ -149,16 +142,16 @@ const Home: React.FC = () => {
 
       {/* Retro Call to Action */}
       <section className="max-w-7xl mx-auto px-4">
-        <div className="pixel-border p-8 bg-bg-secondary flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left">
-            <h2 className="font-pixel-xl text-white mb-2">{language === 'ar' ? 'هل أنت مطور؟' : 'ARE YOU A DEVELOPER?'}</h2>
+        <div className="pixel-border p-8 bg-bg-secondary flex flex-col md:flex-row items-center justify-between gap-6" dir={direction}>
+          <div className="text-center md:text-left rtl:md:text-right">
+            <h2 className="font-pixel-xl text-white mb-2">{t('home.devQuestion')}</h2>
             <p className="text-text-secondary font-pixel text-[10px]">
-              {language === 'ar' ? 'انشر ألعابك للآلاف من اللاعبين.' : 'PUBLISH YOUR GAMES TO THOUSANDS OF PLAYERS.'}
+              {t('home.devAction')}
             </p>
           </div>
           <Link to="/register">
             <button className="btn-retro">
-              {language === 'ar' ? 'ابدأ اليوم' : 'START TODAY'}
+              {t('home.startToday')}
             </button>
           </Link>
         </div>

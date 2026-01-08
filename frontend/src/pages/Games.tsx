@@ -75,7 +75,7 @@ const Games: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="font-pixel text-accent-primary-bright animate-pulse">LOADING...</div>
+        <div className="font-pixel text-accent-primary-bright animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -85,11 +85,11 @@ const Games: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="font-pixel-2xl text-accent-primary-bright mb-4 crt-glow">
-          {sortParam === 'popular' ? (language === 'ar' ? 'الأكثر شعبية' : 'MOST POPULAR') :
-            sortParam === 'top-rated' ? (language === 'ar' ? 'الأعلى تقييماً' : 'TOP RATED') :
-              sortParam === 'trending' ? (language === 'ar' ? 'الرائج الآن' : 'TRENDING NOW') :
-                sortParam === 'gems' ? (language === 'ar' ? 'جواهر خفية' : 'HIDDEN GEMS') :
-                  t('nav.games')}
+          {sortParam === 'popular' ? t('home.popular') :
+            sortParam === 'top-rated' ? t('home.topRated') :
+              sortParam === 'trending' ? t('home.trending') :
+                sortParam === 'gems' ? t('home.gems') :
+                  t('nav.games').toUpperCase()}
         </h1>
         <div className="section-divider"></div>
       </div>
@@ -155,7 +155,7 @@ const Games: React.FC = () => {
                   {/* Status Badge */}
                   {game.status === 'approved' && (
                     <div className="absolute top-2 right-2 px-2 py-1 bg-success/20 border border-success rounded">
-                      <span className="font-pixel text-xs text-success">APPROVED</span>
+                      <span className="font-pixel text-xs text-success">{t('common.status.approved').toUpperCase()}</span>
                     </div>
                   )}
                 </div>
@@ -174,7 +174,7 @@ const Games: React.FC = () => {
                   <h3 className="font-pixel text-xs text-accent-primary-bright mb-3">
                     {title}
                   </h3>
-                  <p className="text-sm text-text-secondary mb-4 line-clamp-4 flex-1 leading-relaxed" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                  <p className="text-[15px] text-text-primary mb-4 line-clamp-5 flex-1 leading-relaxed font-medium" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                     {description}
                   </p>
 
@@ -206,7 +206,7 @@ const Games: React.FC = () => {
 
                   <Link to={`/games/${game.id}`}>
                     <button className="w-full btn-retro mt-auto">
-                      VIEW DETAILS
+                      {t('game.viewDetails').toUpperCase()}
                     </button>
                   </Link>
                 </div>
@@ -218,9 +218,9 @@ const Games: React.FC = () => {
 
       {filteredGames.length === 0 && (
         <div className="text-center py-16">
-          <div className="font-pixel text-text-secondary mb-4">NO GAMES FOUND</div>
+          <div className="font-pixel text-text-secondary mb-4">{t('admin.noGamesFound')}</div>
           <p className="text-text-muted text-sm">
-            {searchQuery ? 'Try a different search term' : 'No games available in this category'}
+            {searchQuery ? t('search.placeholder') : t('dashboard.noGames')}
           </p>
         </div>
       )}

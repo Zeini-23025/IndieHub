@@ -22,6 +22,8 @@ const Dashboard: React.FC = () => {
   const [existingScreenshots, setExistingScreenshots] = useState<Screenshot[]>([]);
   const [analyticsOpen, setAnalyticsOpen] = useState<Record<number, boolean>>({});
   const [analyticsData, setAnalyticsData] = useState<Record<number, any>>({});
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
+  const [confirmingScreenshotId, setConfirmingScreenshotId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     title_ar: '',
@@ -105,16 +107,15 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteScreenshot = async (screenshotId: number) => {
-    if (confirm('DELETE THIS SCREENSHOT?')) {
-      try {
-        await screenshotsAPI.deleteScreenshot(screenshotId);
-        if (editingGame) {
-          const updated = await screenshotsAPI.getScreenshots(editingGame.id);
-          setExistingScreenshots(updated);
-        }
-      } catch (error) {
-        alert('FAILED TO DELETE SCREENSHOT');
+    try {
+      await screenshotsAPI.deleteScreenshot(screenshotId);
+      setConfirmingScreenshotId(null);
+      if (editingGame) {
+        const updated = await screenshotsAPI.getScreenshots(editingGame.id);
+        setExistingScreenshots(updated);
       }
+    } catch (error) {
+      alert(t('common.error'));
     }
   };
 
@@ -128,6 +129,16 @@ const Dashboard: React.FC = () => {
       setAnalyticsData(prev => ({ ...prev, [gameId]: { downloads, avgRatings, distribution } }));
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
+    }
+  };
+
+  const handleDeleteGame = async (gameId: number) => {
+    try {
+      await gamesAPI.deleteGame(gameId);
+      setConfirmingDeleteId(null);
+      fetchGames();
+    } catch (error) {
+      alert(t('common.error'));
     }
   };
 
@@ -148,9 +159,6 @@ const Dashboard: React.FC = () => {
     try {
       let savedGame: Game;
       if (editingGame) {
-        // Prepare PATCH data (FormData doesn't work well for partial updates of nested fields in some DRF configs, 
-        // but here we are mainly updating the model fields. For M2M we use category_ids)
-        // Note: DRF PrimaryKeyRelatedField (source='categories') handles category_ids in PATCH if configured.
         const updateData: any = {
           title: formData.title,
           title_ar: formData.title_ar,
@@ -159,7 +167,6 @@ const Dashboard: React.FC = () => {
           category_ids: formData.category_ids,
         };
 
-        // If file is provided, we need FormData for PATCH
         if (formData.file) {
           const patchFormData = new FormData();
           Object.keys(updateData).forEach(key => {
@@ -180,7 +187,6 @@ const Dashboard: React.FC = () => {
 
       const targetGameId = savedGame.id;
 
-      // Upload cover image as base screenshot
       if (formData.coverImage && targetGameId) {
         const coverFormData = new FormData();
         coverFormData.append('game', targetGameId.toString());
@@ -193,7 +199,6 @@ const Dashboard: React.FC = () => {
         }
       }
 
-      // Upload banner image
       if (formData.bannerImage && targetGameId) {
         const bannerFormData = new FormData();
         bannerFormData.append('game', targetGameId.toString());
@@ -206,7 +211,6 @@ const Dashboard: React.FC = () => {
         }
       }
 
-      // Upload screenshots
       for (const screenshot of formData.screenshots) {
         if (targetGameId) {
           const screenshotFormData = new FormData();
@@ -250,7 +254,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="font-pixel text-accent-red-bright animate-pulse">LOADING...</div>
+        <div className="font-pixel text-accent-red-bright animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -281,7 +285,7 @@ const Dashboard: React.FC = () => {
           }}
           variant={showForm ? 'secondary' : 'primary'}
         >
-          {showForm ? 'CANCEL' : t('dashboard.submitGame')}
+          {showForm ? t('common.cancel') : t('dashboard.submitGame')}
         </RetroButton>
       </div>
 
@@ -302,39 +306,41 @@ const Dashboard: React.FC = () => {
             {editingGame ? `EDIT: ${editingGame.title}` : t('dashboard.submitGame')}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 text-left">
               <RetroInput
-                label="TITLE (EN)"
+                label={`${t('gameForm.title')} (EN)`}
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
               />
               <RetroInput
-                label="TITLE (AR)"
+                label={`${t('gameForm.title')} (AR)`}
                 value={formData.title_ar}
                 onChange={(e) => setFormData({ ...formData, title_ar: e.target.value })}
                 required
+                dir="rtl"
               />
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 text-left">
               <RetroTextarea
-                label="DESCRIPTION (EN)"
+                label={`${t('gameForm.description')} (EN)`}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
                 rows={6}
               />
               <RetroTextarea
-                label="DESCRIPTION (AR)"
+                label={`${t('gameForm.description')} (AR)`}
                 value={formData.description_ar}
                 onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })}
                 required
                 rows={6}
+                dir="rtl"
               />
             </div>
-            <div>
+            <div className="text-left">
               <label className="block mb-2 font-pixel text-xs text-text-secondary">
-                GAME FILE (ZIP, RAR, 7Z, EXE)
+                {t('dashboard.gameFile')} (ZIP, RAR, 7Z, EXE)
               </label>
               <input
                 type="file"
@@ -343,11 +349,11 @@ const Dashboard: React.FC = () => {
                 required={!editingGame}
                 className="w-full px-4 py-3 bg-bg-tertiary border-2 border-border-color text-text-primary font-mono text-sm focus:outline-none focus:border-accent-red"
               />
-              {editingGame && <p className="text-xs text-text-muted mt-1 italic">LEAVE EMPTY TO KEEP CURRENT FILE</p>}
+              {editingGame && <p className="text-xs text-text-muted mt-1 italic">{t('dashboard.leaveEmpty')}</p>}
             </div>
-            <div>
+            <div className="text-left">
               <label className="block mb-2 font-pixel text-xs text-text-secondary">
-                COVER IMAGE (WILL BE SET AS BASE SCREENSHOT)
+                {t('dashboard.coverImage')} ({t('dashboard.screenshots')})
               </label>
               <input
                 type="file"
@@ -356,9 +362,9 @@ const Dashboard: React.FC = () => {
                 className="w-full px-4 py-3 bg-bg-tertiary border-2 border-border-color text-text-primary font-mono text-sm focus:outline-none focus:border-accent-red"
               />
             </div>
-            <div>
+            <div className="text-left">
               <label className="block mb-2 font-pixel text-xs text-text-secondary">
-                BANNER IMAGE
+                {t('dashboard.bannerImage')}
               </label>
               <input
                 type="file"
@@ -367,9 +373,9 @@ const Dashboard: React.FC = () => {
                 className="w-full px-4 py-3 bg-bg-tertiary border-2 border-border-color text-text-primary font-mono text-sm focus:outline-none focus:border-accent-red"
               />
             </div>
-            <div>
+            <div className="text-left">
               <label className="block mb-2 font-pixel text-xs text-text-secondary">
-                SCREENSHOTS (MULTIPLE)
+                {t('dashboard.screenshots')} (MULTIPLE)
               </label>
               <input
                 type="file"
@@ -384,9 +390,9 @@ const Dashboard: React.FC = () => {
             </div>
 
             {editingGame && existingScreenshots.length > 0 && (
-              <div>
+              <div className="text-left">
                 <label className="block mb-4 font-pixel text-xs text-accent-primary-bright">
-                  MANAGE EXISTING SCREENSHOTS
+                  {t('dashboard.manageScreenshots')}
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {existingScreenshots.map((s) => (
@@ -396,15 +402,37 @@ const Dashboard: React.FC = () => {
                         alt="Screenshot"
                         className="w-full h-full object-cover pixel-border"
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteScreenshot(s.id)}
-                        className="absolute top-1 right-1 bg-error text-white p-1 rounded font-pixel text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        X
-                      </button>
+                      {confirmingScreenshotId !== s.id ? (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingScreenshotId(s.id)}
+                          className="absolute top-1 right-1 bg-error text-white p-1 rounded font-pixel text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          X
+                        </button>
+                      ) : (
+                        <div className="absolute inset-0 bg-bg-primary/90 flex flex-col items-center justify-center p-2 z-10">
+                          <p className="font-pixel text-[8px] text-error text-center mb-2 uppercase">{t('common.confirm')}?</p>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteScreenshot(s.id)}
+                              className="bg-error text-white px-2 py-1 font-pixel text-[8px] hover:bg-error-bright"
+                            >
+                              Y
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setConfirmingScreenshotId(null)}
+                              className="bg-bg-secondary text-text-primary px-2 py-1 font-pixel text-[8px] border border-border-color"
+                            >
+                              N
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       {s.is_base && (
-                        <span className="absolute bottom-1 left-1 bg-accent-primary text-black px-1 font-pixel text-[8px]">
+                        <span className="absolute bottom-1 right-1 bg-accent-primary text-black px-1 font-pixel text-[8px]">
                           BASE
                         </span>
                       )}
@@ -414,10 +442,10 @@ const Dashboard: React.FC = () => {
               </div>
             )}
             <div>
-              <label className="block mb-2 font-pixel text-xs text-text-secondary">
+              <label className="block mb-2 font-pixel text-xs text-text-secondary text-left">
                 {t('gameForm.categories')}
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left">
                 {categories.map((cat) => (
                   <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -440,7 +468,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <RetroButton type="submit" variant="primary">
-              {editingGame ? 'UPDATE GAME' : 'SUBMIT GAME'}
+              {editingGame ? t('common.update') : t('common.submit')}
             </RetroButton>
           </form>
         </div>
@@ -449,74 +477,100 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredGames.map((game) => {
           const title = language === 'ar' ? game.title_ar : game.title;
+          const isConfirming = confirmingDeleteId === game.id;
+
           return (
             <div
               key={game.id}
-              className="bg-bg-secondary pixel-border p-6 hover:border-accent-red transition-all"
+              className="bg-bg-secondary pixel-border p-6 hover:border-accent-red transition-all flex flex-col justify-between"
             >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-pixel-lg text-text-primary flex-1">{title}</h3>
-                <span className={`px-2 py-1 font-pixel text-xs rounded ${game.status === 'approved' ? 'bg-success/20 text-success border border-success' :
-                  game.status === 'pending' ? 'bg-warning/20 text-warning border border-warning' :
-                    'bg-error/20 text-error border border-error'
-                  }`}>
-                  {game.status.toUpperCase()}
-                </span>
+              <div>
+                <div className="flex justify-between items-start mb-4 text-left">
+                  <h3 className="font-pixel-lg text-text-primary flex-1">{title}</h3>
+                  <span className={`px-2 py-1 font-pixel text-xs rounded ${game.status === 'approved' ? 'bg-success/20 text-success border border-success' :
+                    game.status === 'pending' ? 'bg-warning/20 text-warning border border-warning' :
+                      'bg-error/20 text-error border border-error'
+                    }`}>
+                    {t(`common.status.${game.status}`)}
+                  </span>
+                </div>
+                <p className="text-text-secondary text-sm mb-4 line-clamp-2 text-left" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                  {language === 'ar' ? game.description_ar : game.description}
+                </p>
               </div>
-              <p className="text-text-secondary text-sm mb-4 line-clamp-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                {language === 'ar' ? game.description_ar : game.description}
-              </p>
-              <div className="flex gap-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                <RetroButton
-                  onClick={() => navigate(`/games/${game.id}`)}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  VIEW
-                </RetroButton>
-                <RetroButton
-                  onClick={() => handleEdit(game)}
-                  variant="primary"
-                  className="flex-1"
-                >
-                  EDIT
-                </RetroButton>
-                {(user?.role === 'admin' || user?.id === game.developer) && (
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                  <RetroButton
+                    onClick={() => navigate(`/games/${game.id}`)}
+                    variant="secondary"
+                    className="flex-1 min-w-[80px] text-[10px]"
+                  >
+                    {t('common.view')}
+                  </RetroButton>
+                  <RetroButton
+                    onClick={() => handleEdit(game)}
+                    variant="primary"
+                    className="flex-1 min-w-[80px] text-[10px]"
+                  >
+                    {t('common.edit')}
+                  </RetroButton>
                   <RetroButton
                     onClick={async () => {
-                      if (confirm('DELETE THIS GAME?')) {
-                        try {
-                          await gamesAPI.deleteGame(game.id);
-                          fetchGames();
-                        } catch (error) {
-                          alert('FAILED TO DELETE GAME');
-                        }
+                      const currentlyOpen = analyticsOpen[game.id];
+                      if (!currentlyOpen) {
+                        await fetchAnalyticsForGame(game.id);
                       }
+                      setAnalyticsOpen(prev => ({ ...prev, [game.id]: !currentlyOpen }));
                     }}
-                    variant="danger"
+                    variant="secondary"
+                    className="flex-1 min-w-[80px] text-[10px]"
                   >
-                    DELETE
+                    {t('dashboard.analytics')}
                   </RetroButton>
+                </div>
+
+                {(user?.role === 'admin' || user?.id === game.developer) && (
+                  <div className="mt-2 pt-2 border-t border-border-color">
+                    {!isConfirming ? (
+                      <RetroButton
+                        onClick={() => setConfirmingDeleteId(game.id)}
+                        variant="danger"
+                        className="w-full text-[10px]"
+                      >
+                        {t('common.delete')}
+                      </RetroButton>
+                    ) : (
+                      <div className="bg-bg-tertiary p-3 rounded border border-error/30 animate-pulse">
+                        <p className="font-pixel text-[10px] text-error text-center mb-3">
+                          {t('dashboard.deleteConfirm')}
+                        </p>
+                        <div className="flex gap-2">
+                          <RetroButton
+                            onClick={() => handleDeleteGame(game.id)}
+                            variant="danger"
+                            className="flex-1 text-[8px] py-1"
+                          >
+                            {t('common.confirm')}
+                          </RetroButton>
+                          <RetroButton
+                            onClick={() => setConfirmingDeleteId(null)}
+                            variant="secondary"
+                            className="flex-1 text-[8px] py-1"
+                          >
+                            {t('common.cancel')}
+                          </RetroButton>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
-                <RetroButton
-                  onClick={async () => {
-                    // toggle analytics panel
-                    const currentlyOpen = analyticsOpen[game.id];
-                    if (!currentlyOpen) {
-                      await fetchAnalyticsForGame(game.id);
-                    }
-                    setAnalyticsOpen(prev => ({ ...prev, [game.id]: !currentlyOpen }));
-                  }}
-                  variant="secondary"
-                >
-                  ANALYTICS
-                </RetroButton>
               </div>
+
               {analyticsOpen[game.id] && (
                 <div className="mt-4 bg-bg-tertiary p-4 rounded border border-border-color">
-                  {/* Downloads over time */}
-                  <div className="mb-4">
-                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Downloads (daily)</h4>
+                  <div className="mb-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">{t('dashboard.downloadsDaily')}</h4>
                     {analyticsData[game.id]?.downloads?.length ? (
                       <div className="space-y-1">
                         {analyticsData[game.id].downloads.map((d: any) => {
@@ -524,7 +578,7 @@ const Dashboard: React.FC = () => {
                           const width = Math.round((d.count / max) * 100);
                           return (
                             <div key={d.period} className="flex items-center gap-2">
-                              <div className="text-[10px] text-text-muted w-24">{d.period}</div>
+                              <div className="text-[10px] text-text-muted w-24 text-left">{d.period}</div>
                               <div className="bg-accent-primary/40 h-3 rounded" style={{ width: `${width}%` }} />
                               <div className="text-xs text-text-primary ml-2">{d.count}</div>
                             </div>
@@ -532,18 +586,17 @@ const Dashboard: React.FC = () => {
                         })}
                       </div>
                     ) : (
-                      <div className="text-xs text-text-muted">No download data</div>
+                      <div className="text-xs text-text-muted">{t('dashboard.noData')}</div>
                     )}
                   </div>
 
-                  {/* Average rating over time */}
-                  <div className="mb-4">
-                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Average rating (daily)</h4>
+                  <div className="mb-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">{t('dashboard.ratingDaily')}</h4>
                     {analyticsData[game.id]?.avgRatings?.length ? (
                       <div className="space-y-1">
                         {analyticsData[game.id].avgRatings.map((r: any) => (
                           <div key={r.period} className="flex items-center gap-2">
-                            <div className="text-[10px] text-text-muted w-24">{r.period}</div>
+                            <div className="text-[10px] text-text-muted w-24 text-left">{r.period}</div>
                             <div className="flex-1 bg-bg-secondary h-3 rounded relative">
                               <div className="bg-accent-primary h-3 rounded" style={{ width: `${(r.average / 5) * 100}%` }} />
                             </div>
@@ -552,17 +605,17 @@ const Dashboard: React.FC = () => {
                         ))}
                       </div>
                     ) : (
-                      <div className="text-xs text-text-muted">No rating data</div>
+                      <div className="text-xs text-text-muted">{t('dashboard.noData')}</div>
                     )}
                   </div>
 
-                  {/* Rating distribution */}
-                  <div>
-                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">Rating distribution</h4>
+                  <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                    <h4 className="font-pixel text-xs text-accent-primary-bright mb-2">{t('dashboard.ratingDistribution')}</h4>
                     {analyticsData[game.id]?.distribution ? (
                       <div className="space-y-1">
                         {Object.entries(analyticsData[game.id].distribution.distribution || {}).map(([star, count]: any) => {
-                          const max = Math.max(...Object.values(analyticsData[game.id].distribution.distribution || {}), 1);
+                          const distributionValues = Object.values(analyticsData[game.id].distribution.distribution || {}) as number[];
+                          const max = Math.max(...distributionValues, 1);
                           const width = Math.round((count / max) * 100);
                           return (
                             <div key={star} className="flex items-center gap-2">
@@ -576,7 +629,7 @@ const Dashboard: React.FC = () => {
                         })}
                       </div>
                     ) : (
-                      <div className="text-xs text-text-muted">No distribution data</div>
+                      <div className="text-xs text-text-muted">{t('dashboard.noData')}</div>
                     )}
                   </div>
                 </div>
@@ -588,7 +641,7 @@ const Dashboard: React.FC = () => {
 
       {filteredGames.length === 0 && (
         <div className="text-center py-16">
-          <div className="font-pixel text-text-secondary mb-4">NO GAMES SUBMITTED YET</div>
+          <div className="font-pixel text-text-secondary mb-4 uppercase">{t('dashboard.noGames')}</div>
         </div>
       )}
     </div>

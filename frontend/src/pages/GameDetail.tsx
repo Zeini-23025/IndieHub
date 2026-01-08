@@ -144,7 +144,7 @@ const GameDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="font-pixel text-accent-primary-bright animate-pulse">LOADING...</div>
+        <div className="font-pixel text-accent-primary-bright animate-pulse">{t('common.loading')}</div>
       </div>
     );
   }
@@ -152,7 +152,7 @@ const GameDetail: React.FC = () => {
   if (!game) {
     return (
       <div className="text-center py-16">
-        <div className="font-pixel text-text-secondary mb-4">GAME NOT FOUND</div>
+        <div className="font-pixel text-text-secondary mb-4">{t('game.notFound')}</div>
       </div>
     );
   }
@@ -194,7 +194,9 @@ const GameDetail: React.FC = () => {
               game.status === 'pending' ? 'bg-warning/20 text-warning border border-warning' :
                 'bg-error/20 text-error border border-error'
               }`}>
-              {game.status.toUpperCase()}
+              {game.status === 'approved' ? t('common.status.approved').toUpperCase() :
+                game.status === 'pending' ? t('common.status.pending').toUpperCase() :
+                  t('common.status.rejected').toUpperCase()}
             </span>
           </div>
         </div>
@@ -208,7 +210,7 @@ const GameDetail: React.FC = () => {
             disabled={downloading}
             variant="primary"
           >
-            {downloading ? 'DOWNLOADING...' : t('game.download')}
+            {downloading ? t('game.downloading').toUpperCase() : t('game.download').toUpperCase()}
           </RetroButton>
         )}
         {isAuthenticated && game.status === 'approved' && (
@@ -236,7 +238,7 @@ const GameDetail: React.FC = () => {
 
       {/* Game Description */}
       <section className="bg-bg-secondary pixel-border p-6 rounded-lg">
-        <h2 className="font-pixel-lg text-accent-primary-bright mb-4">DESCRIPTION</h2>
+        <h2 className="font-pixel-lg text-accent-primary-bright mb-4">{t('game.description')}</h2>
         <p className="text-text-primary text-sm leading-relaxed whitespace-pre-wrap" dir={language === 'ar' ? 'rtl' : 'ltr'}>
           {description}
         </p>
@@ -262,7 +264,7 @@ const GameDetail: React.FC = () => {
       {/* Screenshot Gallery */}
       {screenshots.length > 0 && (
         <section>
-          <h2 className="font-pixel-lg text-accent-primary-bright mb-4">SCREENSHOTS</h2>
+          <h2 className="font-pixel-lg text-accent-primary-bright mb-4">{t('game.screenshots')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             {screenshots.map((screenshot, index) => (
               <button
@@ -310,9 +312,9 @@ const GameDetail: React.FC = () => {
         </div>
 
         {showReviewForm && (
-          <div className="mb-6 p-4 bg-bg-tertiary pixel-border rounded-lg">
+          <div className="mb-6 p-4 bg-bg-tertiary pixel-border rounded-lg" dir={language === 'ar' ? 'rtl' : 'ltr'}>
             <div className="mb-4">
-              <label className="block mb-2 font-pixel text-xs" style={{ color: 'var(--text-secondary)' }}>RATING</label>
+              <label className="block mb-2 font-pixel text-xs" style={{ color: 'var(--text-secondary)' }}>{t('game.rating')}</label>
               <select
                 value={reviewRating}
                 onChange={(e) => setReviewRating(parseInt(e.target.value))}
@@ -325,14 +327,14 @@ const GameDetail: React.FC = () => {
               </select>
             </div>
             <RetroTextarea
-              label="COMMENT"
+              label={t('game.comment')}
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
               rows={4}
             />
             <div className="flex gap-2 mt-4">
               <RetroButton onClick={handleSubmitReview} variant="primary">
-                SUBMIT
+                {t('common.submit').toUpperCase()}
               </RetroButton>
               <RetroButton
                 onClick={() => {
@@ -341,7 +343,7 @@ const GameDetail: React.FC = () => {
                 }}
                 variant="secondary"
               >
-                CANCEL
+                {t('common.cancel').toUpperCase()}
               </RetroButton>
             </div>
           </div>
@@ -375,7 +377,7 @@ const GameDetail: React.FC = () => {
           ))}
           {reviews.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-text-muted text-sm">NO REVIEWS YET</p>
+              <p className="text-text-muted text-sm">{t('game.noReviews')}</p>
             </div>
           )}
         </div>
