@@ -46,7 +46,18 @@ export interface Game {
   categories: Category[];
   created_at: string;
   updated_at: string;
+  base_screenshot?: string;
+  average_rating?: number;
+  download_count?: number;
   rejection_reason?: string;
+}
+
+export interface HomeSections {
+  most_popular: Game[];
+  new_releases: Game[];
+  top_rated: Game[];
+  trending_now: Game[];
+  hidden_gems: Game[];
 }
 
 export interface Screenshot {
@@ -94,8 +105,12 @@ export const authAPI = {
 
 // Games API
 export const gamesAPI = {
-  getGames: async (): Promise<Game[]> => {
-    const response = await api.get('/games/games-list/');
+  getGames: async (params?: Record<string, any>): Promise<Game[]> => {
+    const response = await api.get('/games/games-list/', { params });
+    return response.data;
+  },
+  getHomeSections: async (): Promise<HomeSections> => {
+    const response = await api.get('/games/home-sections/');
     return response.data;
   },
   getGame: async (id: number): Promise<Game> => {

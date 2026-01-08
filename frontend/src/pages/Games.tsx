@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { gamesAPI, categoriesAPI, screenshotsAPI, BACKEND_URL } from '../services/api';
 import type { Game, Category, Screenshot } from '../services/api';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const Games: React.FC = () => {
   const { language, t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const sortParam = searchParams.get('sort');
+
   const [games, setGames] = useState<Game[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -16,9 +19,10 @@ const Games: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [gamesData, categoriesData] = await Promise.all([
-          gamesAPI.getGames(),
+          gamesAPI.getGames(sortParam ? { sort: sortParam } : undefined),
           categoriesAPI.getCategories(),
         ]);
         setGames(gamesData);
@@ -46,7 +50,7 @@ const Games: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [sortParam]);
 
   const filteredGames = games.filter((game) => {
     const matchesCategory = selectedCategory === null || game.categories.some(cat => cat.id === selectedCategory);
@@ -81,7 +85,11 @@ const Games: React.FC = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="font-pixel-2xl text-accent-primary-bright mb-4 crt-glow">
-          {t('nav.games')}
+          {sortParam === 'popular' ? (language === 'ar' ? 'الأكثر شعبية' : 'MOST POPULAR') :
+            sortParam === 'top-rated' ? (language === 'ar' ? 'الأعلى تقييماً' : 'TOP RATED') :
+              sortParam === 'trending' ? (language === 'ar' ? 'الرائج الآن' : 'TRENDING NOW') :
+                sortParam === 'gems' ? (language === 'ar' ? 'جواهر خفية' : 'HIDDEN GEMS') :
+                  t('nav.games')}
         </h1>
         <div className="section-divider"></div>
       </div>
