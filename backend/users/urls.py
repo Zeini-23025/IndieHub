@@ -3,7 +3,8 @@ from .views import (
     UserRegistrationView,
     UserListCreateView,
     UserRetrieveUpdateDestroyView,
-    LoginView
+    LoginView,
+    LogoutView
 )
 
 urlpatterns = [
@@ -26,5 +27,9 @@ urlpatterns = [
     # POST to login and obtain auth token
     path(
         'login/', LoginView.as_view(), name='user-login'
+        ),
+    # POST to logout and delete token
+    path(
+        'logout/', LogoutView.as_view(), name='user-logout'
         ),
 ]
