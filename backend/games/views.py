@@ -121,24 +121,48 @@ class GameListView(viewsets.ReadOnlyModelViewSet):
     permission_classes = []  # Allow any user (authenticated or not)
 
     def get_queryset(self):
-        # Same filtering rules as the main GameViewSet
         user = self.request.user
+        sort = self.request.query_params.get('sort')
+        now = timezone.now()
+        last_week = now - timedelta(days=7)
+
+        # Base filtering
         if (
             user
             and user.is_authenticated
             and getattr(user, 'role', None) == 'admin'
         ):
-            return Game.objects.all().order_by('-created_at')
-        if (
+            qs = Game.objects.all()
+        elif (
             user
             and user.is_authenticated
             and getattr(user, 'role', None) == 'developer'
         ):
-            return (
-                Game.objects.filter(Q(status='approved') | Q(developer=user))
-                .order_by('-created_at')
+            qs = Game.objects.filter(Q(status='approved') | Q(developer=user))
+        else:
+            qs = Game.objects.filter(status='approved')
+
+        # Annotations for sorting
+        qs = qs.annotate(
+            avg_rating=Avg('reviews__rating'),
+            download_count=Count('downloads', distinct=True)
+        )
+
+        # Sorting logic
+        if sort == 'popular':
+            return qs.order_by('-download_count', '-created_at')
+        elif sort == 'top-rated':
+            return qs.filter(reviews__isnull=False).order_by('-avg_rating', '-created_at')
+        elif sort == 'trending':
+            qs = qs.annotate(
+                weekly_downloads=Count('downloads', filter=Q(downloads__timestamp__gte=last_week))
             )
-        return Game.objects.filter(status='approved').order_by('-created_at')
+            return qs.order_by('-weekly_downloads', '-created_at')
+        elif sort == 'gems':
+            # Dynamic: High rating (>=4.0), fewest downloads first
+            return qs.filter(avg_rating__gte=4.0).order_by('download_count', '-avg_rating')
+        
+        return qs.order_by('-created_at')
 
 
 class ScreenshotViewSet(viewsets.ModelViewSet):
@@ -429,3 +453,54 @@ class AnalyticsRatingDistributionView(APIView):
             distribution[str(item['rating'])] = item['count']
 
         return Response({'distribution': distribution})
+
+class GameHomeSectionsView(APIView):
+    """
+    API endpoint to fetch all curated game sections for the home page.
+    - Most Popular: Top 10 by total downloads.
+    - New Releases: Last 10 approved games.
+    - Top Rated: Top 10 by average rating (min 3 reviews).
+    - Trending Now: Top 10 by downloads in the last 7 days.
+    - Hidden Gems: Top 10 with rating > 4.0 and downloads < 50.
+    """
+    permission_classes = []  # Allow anyone
+
+    def get(self, request):
+        now = timezone.now()
+        last_week = now - timedelta(days=7)
+
+        # Base queryset for approved games
+        approved_games = Game.objects.filter(status='approved')
+
+        # 1. Most Popular (Top 10 by total downloads)
+        most_popular = approved_games.annotate(
+            download_count=Count('downloads')
+        ).order_by('-download_count')[:10]
+
+        # 2. New Releases (Last 10 approved games)
+        new_releases = approved_games.order_by('-created_at')[:10]
+
+        # 3. Top Rated (Top 10 by average rating, min 1 review for now to avoid empty list)
+        top_rated = approved_games.annotate(
+            average_rating=Avg('reviews__rating'),
+            review_count=Count('reviews')
+        ).filter(review_count__gte=1).order_by('-average_rating')[:10]
+
+        # 4. Trending Now (Top 10 by downloads in the last 7 days)
+        trending_now = approved_games.annotate(
+            weekly_downloads=Count('downloads', filter=Q(downloads__timestamp__gte=last_week))
+        ).order_by('-weekly_downloads')[:10]
+
+        # 5. Hidden Gems (Rating >= 4.0, fewest downloads first)
+        hidden_gems = approved_games.annotate(
+            average_rating=Avg('reviews__rating'),
+            download_count=Count('downloads')
+        ).filter(average_rating__gte=4.0).order_by('download_count', '-average_rating')[:10]
+
+        return Response({
+            'most_popular': GameSerializer(most_popular, many=True, context={'request': request}).data,
+            'new_releases': GameSerializer(new_releases, many=True, context={'request': request}).data,
+            'top_rated': GameSerializer(top_rated, many=True, context={'request': request}).data,
+            'trending_now': GameSerializer(trending_now, many=True, context={'request': request}).data,
+            'hidden_gems': GameSerializer(hidden_gems, many=True, context={'request': request}).data,
+        })

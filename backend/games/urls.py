@@ -2,12 +2,11 @@ from .views import (
     CategoryViewSet, CategoryListView,
     GameViewSet, GameListView,
     ScreenshotViewSet, ScreenshotListView,
-    ReviewViewSet, ReviewListView
-    )
-from .views import (
+    ReviewViewSet, ReviewListView,
     AnalyticsDownloadsView,
     AnalyticsAvgRatingView,
-    AnalyticsRatingDistributionView
+    AnalyticsRatingDistributionView,
+    GameHomeSectionsView
 )
 from rest_framework.routers import DefaultRouter
 from django.urls import path
@@ -37,5 +36,10 @@ urlpatterns += [
         'analytics/ratings/distribution/',
         AnalyticsRatingDistributionView.as_view(),
         name='analytics-ratings-distribution'
+        ),
+    path(
+        'home-sections/',
+        GameHomeSectionsView.as_view(),
+        name='game-home-sections'
         ),
 ]
