@@ -33,6 +33,10 @@ class GameSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    base_screenshot = serializers.SerializerMethodField()
+    average_rating = serializers.FloatField(read_only=True, required=False)
+    download_count = serializers.IntegerField(read_only=True, required=False)
+
     class Meta:
         model = Game
         fields = [
@@ -40,9 +44,23 @@ class GameSerializer(serializers.ModelSerializer):
             'title_ar', 'description_ar',
             'file_path', 'status', 'developer',
             'categories', 'category_ids',
+            'base_screenshot', 'average_rating', 'download_count',
             'created_at', 'updated_at'
         ]
-    read_only_fields = ['id', 'status', 'created_at', 'updated_at']
+    read_only_fields = [
+        'id', 'status', 'created_at', 'updated_at',
+        'base_screenshot', 'average_rating', 'download_count'
+    ]
+
+    def get_base_screenshot(self, obj):
+        """Returns the URL of the base screenshot."""
+        base = obj.screenshots.filter(is_base=True).first()
+        if base:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(base.image_path.url)
+            return base.image_path.url
+        return None
 
     def validate(self, attrs):
         """Prevent non-admin users from setting status in payload."""
