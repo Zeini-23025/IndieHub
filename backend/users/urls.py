@@ -4,7 +4,8 @@ from .views import (
     UserListCreateView,
     UserRetrieveUpdateDestroyView,
     LoginView,
-    LogoutView
+    LogoutView,
+    ChangePasswordView
 )
 
 urlpatterns = [
@@ -31,5 +32,9 @@ urlpatterns = [
     # POST to logout and delete token
     path(
         'logout/', LogoutView.as_view(), name='user-logout'
+        ),
+    # POST to change password
+    path(
+        'change-password/', ChangePasswordView.as_view(), name='change-password'
         ),
 ]
