@@ -3,10 +3,26 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 
+from django.test import override_settings
+
 User = get_user_model()
 
+@override_settings(REST_FRAMEWORK={
+    'DEFAULT_THROTTLE_RATES': {
+        'registration': None,
+        'login': None,
+    }
+})
 class UserTests(APITestCase):
     def setUp(self):
+        # Mock throttles to avoid 429 errors during tests
+        from rest_framework.throttling import ScopedRateThrottle, UserRateThrottle
+        from unittest.mock import patch
+        self.throttle_patcher1 = patch.object(ScopedRateThrottle, 'allow_request', return_value=True)
+        self.throttle_patcher2 = patch.object(UserRateThrottle, 'allow_request', return_value=True)
+        self.throttle_patcher1.start()
+        self.throttle_patcher2.start()
+
         self.register_url = reverse('user-register')
         self.login_url = reverse('user-login')
         self.user_data = {
@@ -15,6 +31,10 @@ class UserTests(APITestCase):
             'password': 'testpassword123',
             'role': 'user'
         }
+
+    def tearDown(self):
+        self.throttle_patcher1.stop()
+        self.throttle_patcher2.stop()
 
     def test_registration(self):
         response = self.client.post(self.register_url, self.user_data)
@@ -30,6 +50,28 @@ class UserTests(APITestCase):
         response = self.client.post(self.register_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get(username='devuser').role, 'developer')
+
+    def test_registration_with_profile_image(self):
+        import io
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # Create a dummy image
+        file = io.BytesIO()
+        image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+        image.save(file, 'png')
+        file.name = 'test.png'
+        file.seek(0)
+        
+        data = self.user_data.copy()
+        data['username'] = 'imageuser'
+        data['profile_image'] = SimpleUploadedFile('test.png', file.read(), content_type='image/png')
+        
+        response = self.client.post(self.register_url, data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(username='imageuser')
+        self.assertTrue(user.profile_image)
+        self.assertIn('profile_images/test', user.profile_image.name)
 
     def test_registration_as_admin_unauthorized(self):
         # Anonymous user trying to register as admin

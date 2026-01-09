@@ -2,6 +2,18 @@ from rest_framework import serializers
 from .models import User
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for password change"""
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return data
+
+
 class UserSerializer(serializers.ModelSerializer):
     """User serializer"""
     password = serializers.CharField(write_only=True)
@@ -10,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'password',
-            'role', 'first_name', 'last_name', 'date_joined'
+            'role', 'profile_image', 'first_name', 'last_name', 'date_joined'
         ]
         read_only_fields = ['id', 'date_joined']
 
