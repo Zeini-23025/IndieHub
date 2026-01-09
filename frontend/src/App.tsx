@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
 import Admin from './pages/Admin';
 import CategoryManagement from './pages/CategoryManagement';
+import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/library" element={<Library />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/categories" element={<CategoryManagement />} />
               <Route path="*" element={<NotFound />} />

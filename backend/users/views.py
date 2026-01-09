@@ -2,7 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.response import Response
 from .models import User
-from .serializers import UserSerializer, LoginSerializer
+from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
 from .permissions import IsAdminUser, IsOwnerOrAdmin
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
@@ -157,3 +157,22 @@ class LogoutView(APIView):
     def post(self, request):
         request.user.auth_token.delete()
         return Response({"detail": "Logged out successfully."})
+
+
+class ChangePasswordView(APIView):
+    """
+    API endpoint to change user password.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        if not user.check_password(serializer.validated_data['old_password']):
+            return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)

@@ -18,6 +18,12 @@ class User(AbstractUser):
         default='user',
         help_text='User role in the system'
     )
+    profile_image = models.ImageField(
+        upload_to='profile_images/',
+        null=True,
+        blank=True,
+        help_text='User profile image'
+    )
 
     class Meta:
         verbose_name = 'User'

@@ -24,6 +24,10 @@ export interface User {
   username: string;
   email: string;
   role: 'admin' | 'developer' | 'user';
+  profile_image?: string;
+  first_name?: string;
+  last_name?: string;
+  date_joined?: string;
 }
 
 export interface Category {
@@ -99,8 +103,15 @@ export const authAPI = {
   logout: async () => {
     await api.post('/users/logout/');
   },
-  // Note: Current user is stored in localStorage after login
-  // If needed, you can fetch user by ID using /users/users/{id}/
+  changePassword: async (passwordData: any) => {
+    const response = await api.post('/users/change-password/', passwordData);
+    return response.data;
+  },
+  updateUser: async (id: number, userData: Partial<User> | FormData) => {
+    const headers = userData instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    const response = await api.patch(`/users/users/${id}/`, userData, { headers });
+    return response.data;
+  },
 };
 
 // Games API

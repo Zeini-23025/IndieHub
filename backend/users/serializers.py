@@ -2,6 +2,18 @@ from rest_framework import serializers
 from .models import User
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for password change"""
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return data
+
+
 class UserSerializer(serializers.ModelSerializer):
     """User serializer"""
     password = serializers.CharField(write_only=True)
@@ -10,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'password',
-            'role', 'first_name', 'last_name', 'date_joined'
+            'role', 'profile_image', 'first_name', 'last_name', 'date_joined'
         ]
         read_only_fields = ['id', 'date_joined']
 
@@ -18,6 +30,24 @@ class UserSerializer(serializers.ModelSerializer):
         """Create user with hashed password"""
         user = User.objects.create_user(**validated_data)
         return user
+
+
+    def validate(self, data):
+        """
+        Validate registration data.
+        Restrict 'admin' role creation to existing admin users.
+        """
+        role = data.get('role')
+        request = self.context.get('request')
+
+        if role == 'admin':
+            # Check if requesting user is an admin
+            if not request or not request.user or not request.user.is_authenticated or request.user.role != 'admin':
+                raise serializers.ValidationError({
+                    "role": "Only administrators can create admin accounts."
+                })
+        
+        return data
 
 
 class LoginSerializer(serializers.Serializer):
@@ -31,5 +61,5 @@ class LoginSerializer(serializers.Serializer):
         if not data.get('username') or not data.get('password'):
             raise serializers.ValidationError(
                 'Must include "username" and "password".'
-                )
+            )
         return data
