@@ -31,6 +31,38 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.get(username='devuser').role, 'developer')
 
+    def test_registration_as_admin_unauthorized(self):
+        # Anonymous user trying to register as admin
+        data = self.user_data.copy()
+        data['username'] = 'fakeadmin'
+        data['role'] = 'admin'
+        response = self.client.post(self.register_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('role', response.data)
+
+    def test_registration_as_admin_by_regular_user(self):
+        # Authenticated non-admin user trying to register an admin
+        user = User.objects.create_user(username='regular', password='p', role='user')
+        self.client.force_authenticate(user=user)
+        
+        data = self.user_data.copy()
+        data['username'] = 'fakeadmin2'
+        data['role'] = 'admin'
+        response = self.client.post(self.register_url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_registration_as_admin_by_admin(self):
+        # Admin user creating another admin
+        admin = User.objects.create_superuser(username='admin_creator', email='ac@a.com', password='p', role='admin')
+        self.client.force_authenticate(user=admin)
+        
+        data = self.user_data.copy()
+        data['username'] = 'newadmin'
+        data['role'] = 'admin'
+        response = self.client.post(self.register_url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(User.objects.get(username='newadmin').role, 'admin')
+
     def test_login(self):
         # Register first
         self.client.post(self.register_url, self.user_data)
@@ -62,9 +94,8 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_user_detail_and_update(self):
-        # Register user
-        self.client.post(self.register_url, self.user_data)
-        user = User.objects.get(username='testuser')
+        # Create user directly instead of registration endpoint for test reliability
+        user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword123', role='user')
         self.client.force_authenticate(user=user)
         
         url = reverse('user-detail', args=[user.id])

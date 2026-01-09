@@ -20,6 +20,24 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+    def validate(self, data):
+        """
+        Validate registration data.
+        Restrict 'admin' role creation to existing admin users.
+        """
+        role = data.get('role')
+        request = self.context.get('request')
+
+        if role == 'admin':
+            # Check if requesting user is an admin
+            if not request or not request.user or not request.user.is_authenticated or request.user.role != 'admin':
+                raise serializers.ValidationError({
+                    "role": "Only administrators can create admin accounts."
+                })
+        
+        return data
+
+
 class LoginSerializer(serializers.Serializer):
     """Serializer for user login (validate credentials)"""
     username = serializers.CharField(write_only=True)
@@ -31,5 +49,5 @@ class LoginSerializer(serializers.Serializer):
         if not data.get('username') or not data.get('password'):
             raise serializers.ValidationError(
                 'Must include "username" and "password".'
-                )
+            )
         return data
