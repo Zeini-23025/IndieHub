@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { InputHTMLAttributes } from 'react';
 
 interface RetroInputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -5,14 +6,17 @@ interface RetroInputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const RetroInput: React.FC<RetroInputProps> = ({ label, className = '', ...props }) => {
+  const id = useId();
+
   return (
     <div className="mb-4">
       {label && (
-        <label className="block mb-2 font-pixel text-xs" style={{ color: 'var(--text-secondary)' }}>
+        <label htmlFor={id} className="block mb-2 font-pixel text-xs" style={{ color: 'var(--text-secondary)' }}>
           {label}
         </label>
       )}
       <input
+        id={id}
         className={`w-full px-4 py-3 font-mono text-sm focus:outline-none ${className}`}
         style={{
           backgroundColor: 'var(--bg-secondary)',
