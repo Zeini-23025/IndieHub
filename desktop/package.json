@@ -1,0 +1,53 @@
+{
+    "name": "indiehub-desktop",
+    "version": "1.0.0",
+    "description": "IndieHub Game Launcher",
+    "main": "./dist/main/main.js",
+    "scripts": {
+        "start": "electron-vite preview",
+        "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:electron\"",
+        "dev:frontend": "cd ../frontend && npm run dev",
+        "dev:electron": "wait-on http://localhost:5173 && electron-vite dev",
+        "build": "electron-vite build",
+        "postinstall": "electron-builder install-app-deps",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder"
+    },
+    "dependencies": {
+        "@electron-toolkit/preload": "^3.0.0",
+        "@electron-toolkit/utils": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^18.14.6",
+        "@types/react": "^18.0.28",
+        "@types/react-dom": "^18.0.11",
+        "@vitejs/plugin-react": "^4.0.0",
+        "concurrently": "^9.2.1",
+        "electron": "^25.2.0",
+        "electron-builder": "^24.4.0",
+        "electron-vite": "^1.0.23",
+        "typescript": "^5.0.2",
+        "vite": "^4.3.9",
+        "wait-on": "^9.0.3"
+    },
+    "build": {
+        "appId": "com.indiehub.launcher",
+        "productName": "IndieHub",
+        "directories": {
+            "output": "dist_electron"
+        },
+        "files": [
+            "dist/**/*",
+            "package.json"
+        ],
+        "mac": {
+            "target": "dmg"
+        },
+        "win": {
+            "target": "nsis"
+        },
+        "linux": {
+            "target": "AppImage"
+        }
+    }
+}
