@@ -38,6 +38,11 @@ A web application that centralizes independent games and promotes developers fro
 - **Vite** - Next Generation Frontend Tooling
 - **Axios** - Promise based HTTP client
 
+### Desktop
+- **Electron** - Build cross-platform desktop apps with JavaScript, HTML, and CSS
+- **Electron Vite** - Faster build tool for Electron
+- **Electron Builder** - Packaging tool for Electron
+
 ---
 
 ## 📦 Prerequisites
@@ -92,6 +97,28 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:5173`
+
+### 3. Desktop Application Setup
+
+Prerequisite: Ensure the **frontend** is set up (dependencies installed).
+
+```bash
+cd desktop
+
+# Install dependencies
+npm install
+
+# Run in Development Mode
+# This command automatically starts both the React Frontend and Electron
+npm run dev
+```
+
+To build the desktop application for production:
+
+```bash
+cd desktop
+npm run dist
+```
 
 ---
 
@@ -160,6 +187,10 @@ IndieHub/
 │   ├── public/              # Static assets
 │   └── vite.config.ts       # Vite configuration
 ├── api_docs/                # Detailed API Documentation
+├── desktop/                 # Electron Desktop Application
+│   ├── electron/            # Main & Preload processes
+│   ├── dist/                # Build output
+│   └── package.json         # Desktop dependencies & scripts
 └── README.md
 ```
 
@@ -200,6 +231,11 @@ IndieHub/
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint checkout
+
+### Desktop
+- `npm run dev` - Run Electron app (concurrently starts frontend)
+- `npm run build` - Build Electron main/preload processes
+- `npm run dist` - Package application for distribution (e.g., .dmg, .exe, .AppImage)
 
 ### Backend
 - `python manage.py migrate` - Apply database migrations
