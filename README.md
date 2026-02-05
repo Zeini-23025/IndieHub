@@ -1,88 +1,136 @@
 # IndieHub - Game Launcher Platform
 
-A web application that centralizes independent games and promotes developers from underrepresented communities. IndieHub provides a validation system to ensure cultural, ethical, and religious compliance while offering a modern interface for browsing, submitting, and downloading games.
+**IndieHub** is a web and desktop application designed to centralize independent games and promote developers from underrepresented communities. It provides a robust validation system to ensure cultural, ethical, and religious compliance while offering a modern, bilingual (English/Arabic) interface for browsing, submitting, and downloading games.
 
 ---
 
-## 🎮 Features
+## 🎮 Main Features
 
-- **Game Submission**: Independent developers can submit their games for validation
-- **Content Validation**: Admin system to verify games meet quality and cultural standards
-- **Game Browser**: Users can search, filter, and download validated games
-- **Most Popular Games**: Automatically tracks downloads to showcase trending games
-- **Developer Dashboard**: Track game submission status and manage uploaded games
-- **User Accounts**: Personal library and download history for registered users
-- **Library Management**: Users can manage their personal collection of games
-- **bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR)
-- **Reviews**: Community-driven rating and review system
-
-## 📋 User Roles
-
-- **Administrator**: Validate games, manage users, handle content compliance
-- **Developer**: Submit games, track status, update submissions
-- **User**: Browse, review, and download games (with optional account features)
+- **Game Submission**: Independent developers can submit their games for validation.
+- **Content Validation**: dedicated Admin system to verify games meet quality and cultural standards.
+- **Game Browser**: Users can search, filter, and download approved games.
+- **Analytics & Popularity**: Automatically tracks downloads to showcase trending games.
+- **Developer Dashboard**: Track game submission status and manage uploaded content.
+- **User Library**: Personal collection management for registered users.
+- **Bilingual Support**: Full support for English and Arabic interfaces and content (RTL/LTR).
+- **Community Reviews**: Rating and review system to foster community engagement.
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ Architecture
 
-### Backend
-- **Django** - High-level Python Web Framework
-- **Django REST Framework** - Toolkit for building Web APIs
-- **Django CORS Headers** - Cross-origin resource sharing management
-- **SQLite** - Lightweight database for development
+The project follows a decoupled client-server architecture.
 
-### Frontend
-- **React** - Library for building user interfaces
-- **TypeScript** - Strongly typed JavaScript
-- **Vite** - Next Generation Frontend Tooling
-- **Axios** - Promise based HTTP client
+```mermaid
+graph TD
+    User((User))
+    Dev((Developer))
+    Admin((Admin))
 
-### Desktop
-- **Electron** - Build cross-platform desktop apps with JavaScript, HTML, and CSS
-- **Electron Vite** - Faster build tool for Electron
-- **Electron Builder** - Packaging tool for Electron
+    subgraph Client [Client Side]
+        Web[React Web App]
+        Desktop[Electron Desktop App]
+    end
+
+    subgraph Server [Server Side]
+        API[Django REST API]
+        DB[(SQLite / Postgres)]
+    end
+
+    User --> Web
+    User --> Desktop
+    Dev --> Web
+    Admin --> Web
+
+    Web -->|HTTP Requests| API
+    Desktop -->|Wraps| Web
+    API -->|ORM| DB
+```
 
 ---
 
-## 📦 Prerequisites
+## 📁 Project Structure
 
-- **Python**: 3.9+
-- **Node.js**: 16+
-- **npm** or **yarn**
+```
+IndieHub/
+├── backend/                  # Django REST API (Python)
+│   ├── games/               # Core game management logic
+│   ├── users/               # Authentication & User roles
+│   ├── downloads/           # Analytics & Download tracking
+│   ├── library/             # User personal library
+│   ├── api/                 # API configuration
+│   └── manage.py            # Management script
+├── frontend/                 # React Web Application (TypeScript)
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Application views
+│   │   ├── services/        # API integration
+│   │   └── contexts/        # State management (Auth, Language)
+├── desktop/                  # Electron Wrapper
+│   ├── electron/            # Main process code
+│   └── dist/                # Desktop build artifacts
+├── api_docs/                 # Detailed Technical Documentation
+│   ├── class_diagram.md     # Data Model visualization
+│   ├── sequence_diagram.md  # Request/Response flows
+│   ├── conception.md        # Architectural decisions
+│   ├── game_api.md          # Games Endpoints
+│   ├── user_api.md          # User & Auth Endpoints
+│   ├── category_api.md      # Category Management
+│   ├── download_api.md      # Download & Analytics
+│   ├── library_api.md       # User Library
+│   ├── reviews_api.md       # Game Reviews
+│   └── screenshot_api.md    # Game Screenshots
+└── README.md                 # Project Entry Point
+```
 
 ---
 
-## 🚀 Installation & Setup
+## 🛠️ Technologies Used
+
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Backend** | Django | High-level Python Web Framework |
+| | Django REST Framework | Building robust Web APIs |
+| | SQLite | Development Database |
+| **Frontend** | React 19 | User Interface Library |
+| | TypeScript | Type safety and better DX |
+| | Vite | Next-generation build tool |
+| | TailwindCSS | Utility-first CSS framework |
+| | Axios | HTTP Client |
+| **Desktop** | Electron | Cross-platform desktop apps |
+| **Tools** | Docker | Containerization |
+
+---
+
+## 🚀 How to Run the Project
+
+### Prerequisites
+- Python 3.9+
+- Node.js 16+
+- npm or yarn
 
 ### 1. Backend Setup
 
 ```bash
 cd backend
 
-# Create virtual environment
+# Create and activate virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# On Linux/tvOS:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run database migrations
+# Run migrations and setup DB
 python manage.py migrate
 
-# Create superuser (for admin access)
+# Create admin user
 python manage.py createsuperuser
 
-# Start development server
+# Start server
 python manage.py runserver
 ```
-
-The API will be available at `http://localhost:8000`
+*API will run at `http://localhost:8000`*
 
 ### 2. Frontend Setup
 
@@ -95,173 +143,127 @@ npm install
 # Start development server
 npm run dev
 ```
+*App will run at `http://localhost:5173`*
 
-The application will be available at `http://localhost:5173`
-
-### 3. Desktop Application Setup
-
-Prerequisite: Ensure the **frontend** is set up (dependencies installed).
+### 3. Desktop App Setup (Optional)
 
 ```bash
 cd desktop
-
-# Install dependencies
 npm install
-
-# Run in Development Mode
-# This command automatically starts both the React Frontend and Electron
-npm run dev
+npm run dev  # Starts both Electron and React
 ```
 
-To build the desktop application for production:
+### 4. Run with Docker Compose
+
+To run the entire stack (Frontend + Backend) using Docker:
 
 ```bash
-cd desktop
-npm run dist
-```
-
----
-
-##  Run with Docker
-
-You can run the whole project (backend + frontend) using Docker and the included Compose file. From the repository root:
-
-```bash
-# Build images and start services (foreground, shows logs)
+# Build and start services
 docker compose up --build
 
-# Or run in background (detached)
-docker compose up --build -d
-
-# View logs for all services
-docker compose logs -f
-
-# Rebuild only one service (e.g. frontend) and restart it
-docker compose build --no-cache frontend
-docker compose up -d frontend
+# Run in background
+docker compose up -d
 ```
-
-Ports used by the Compose setup:
-- Frontend: http://localhost:80
-- Backend (API): http://localhost:8000
-
-Notes & troubleshooting
-- If you see large build contexts or tar errors, ensure `.dockerignore` excludes `backend/media` and large files (the repo includes a `.dockerignore`).
-- If your frontend shows CORS errors, prefer using relative API paths (e.g. Axios baseURL `/api`) or proxy `/api` via nginx. The development settings enable CORS when `DEBUG=True`.
-- To run management commands inside the backend container:
-
-```bash
-# open a shell in the running backend container
-docker compose exec backend sh
-
-# run migrations or populate DB
-docker compose exec backend python manage.py migrate --noinput
-docker compose exec backend python manage.py populate_db
-```
-
-If you prefer local development without Docker, follow the steps in the "Installation & Setup" section above.
-
-
-##�📁 Project Structure
-
-```
-IndieHub/
-├── backend/                  # Django REST API
-│   ├── api/                 # Core API configuration
-│   ├── games/               # Games management app
-│   │   ├── models.py        # Game, Category, Screenshot models
-│   │   ├── serializers.py   # DRF serializers
-│   │   ├── views.py         # API views & viewsets
-│   │   └── urls.py          # App-specific routes
-│   ├── users/               # User management & Auth
-│   ├── library/             # User library (purchased/added games)
-│   ├── downloads/           # Download tracking & history
-│   ├── backend/             # Project settings (settings.py, etc.)
-│   └── manage.py            # Django management script
-├── frontend/                # React + TypeScript Client
-│   ├── src/                 # Source code
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/           # Application pages
-│   │   ├── services/        # API service calls
-│   │   └── contexts/        # React contexts (Language, Auth)
-│   ├── public/              # Static assets
-│   └── vite.config.ts       # Vite configuration
-├── api_docs/                # Detailed API Documentation
-├── desktop/                 # Electron Desktop Application
-│   ├── electron/            # Main & Preload processes
-│   ├── dist/                # Build output
-│   └── package.json         # Desktop dependencies & scripts
-└── README.md
-```
+- Frontend: `http://localhost:80`
+- Backend: `http://localhost:8000`
 
 ---
 
 ## 🔌 API Endpoints
 
-**Base URL**: `http://localhost:8000/api/`
+Base URL: `http://localhost:8000/api/`
 
-### Authentication & Users
-- `POST /users/login/` - Authenticate & get token
-- `POST /users/register/` - Register new user
-- `GET /users/users/` - List users (Admin)
+### 👤 Users & Auth
 
-### Games Management
-- `GET /games/games-list/` - List approved games (Public/Search)
-- `GET /games/games-list/{id}/` - Retrieve game details
-- `POST /games/games/` - Submit a new game (Developer)
-- `PATCH /games/games/{id}/` - Update game or Approve/Reject (Admin)
+| Method | Endpoint | Purpose | Example Request |
+|--------|----------|---------|-----------------|
+| `POST` | `/users/register/` | Register new user | `{ "username": "alex", "password": "...", "role": "user" }` |
+| `POST` | `/users/login/` | Authenticate | `{ "username": "alex", "password": "..." }` |
+| `GET` | `/users/users/` | List users (Admin) | Header: `Authorization: Token <token>` |
 
-### Downloads & Popularity
-- `GET /downloads/popular-games/` - Get list of most locally popular games
-- `GET /downloads/games/{game_id}/download/` - Download game file (Authenticated)
-- `POST /downloads/downloads/` - Log a download manually (Backend utility)
+### 🎮 Games
 
-### Reviews
-- `GET /games/reviews-list/` - List all reviews
-- `POST /games/reviews/` - Add a review
-- `PATCH /games/reviews/{id}/` - Update your review
+| Method | Endpoint | Purpose | Example Request |
+|--------|----------|---------|-----------------|
+| `GET` | `/games/games-list/` | List approved games | `GET /games/games-list/?search=rpg` |
+| `POST` | `/games/games/` | Submit game (Dev) | Multipart Form: `title`, `file_path`, `category_ids` |
+| `PATCH` | `/games/games/{id}/` | Approve/Reject (Admin) | `{ "status": "approved" }` |
 
-*For detailed API documentation, please refer to the `api_docs/` directory.*
+### ⤓ Downloads
 
----
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `GET` | `/downloads/popular-games/` | Get trending games by download count |
+| `GET` | `/downloads/games/{id}/download/` | Download game file (Secure stream) |
+| `GET` | `/downloads/games/{id}/stats/` | View download usage statistics |
 
-## 📝 Available Scripts
+### 📚 Library & Reviews
 
-### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint checkout
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `GET` | `/library/entries/` | Get user's personal game library |
+| `POST` | `/library/entries/` | Add game to library |
+| `POST` | `/games/reviews/` | Submit a review for a game |
 
-### Desktop
-- `npm run dev` - Run Electron app (concurrently starts frontend)
-- `npm run build` - Build Electron main/preload processes
-- `npm run dist` - Package application for distribution (e.g., .dmg, .exe, .AppImage)
+*See `api_docs/` for more detailed specifications:*
 
-### Backend
-- `python manage.py migrate` - Apply database migrations
-- `python manage.py createsuperuser` - Create admin user
-- `python manage.py runserver` - Start development server
-- `python manage.py test` - Run tests
-
----
-
-## 🤝 Contributing
-
-1. **Fork** the repository
-2. **Clone** your fork (`git clone ...`)
-3. Create a **Feature Branch** (`git checkout -b feature/MyFeature`)
-4. **Commit** your changes (`git commit -m 'Add some feature'`)
-5. **Push** to the branch (`git push origin feature/MyFeature`)
-6. Open a **Pull Request**
+- **Diagrams & Architecture**:
+  - [Class Diagram](api_docs/class_diagram.md) - Data models
+  - [Sequence Diagram](api_docs/sequence_diagram.md) - User flows
+  - [Conception](api_docs/conception.md) - Architecture design
+- **Endpoints**:
+  - [Users API](api_docs/user_api.md)
+  - [Games API](api_docs/game_api.md)
+  - [Categories API](api_docs/category_api.md)
+  - [Downloads API](api_docs/download_api.md)
+  - [Reviews API](api_docs/reviews_api.md)
+  - [Library API](api_docs/library_api.md)
+  - [Screenshots API](api_docs/screenshot_api.md)
 
 ---
 
-## 📄 License
+## 🧪 Testing
 
-This project is part of the IndieHub initiative to support independent developers. All rights reserved.
+### Django Unit Tests (Backend)
+The backend tests use Django's `APITestCase`. They cover models, serializers, permissions, and API flows.
+
+**Location**: `backend/*/tests.py` and `backend/tests/`
+
+**How to run**:
+```bash
+cd backend
+python manage.py test
+```
+
+**Test Structure**:
+- `test_create_game_as_developer`: Verifies developers can submit games.
+- `test_public_game_list`: Ensures only approved games are visible to public.
+- `test_registration`: checks user creation logic.
+
+### React Unit Tests (Frontend)
+The frontend uses `Vitest` and `React Testing Library`.
+
+**Location**: `frontend/src/test/`
+
+**How to run**:
+```bash
+cd frontend
+npm test
+```
+
+**Test Structure**:
+- `Login.test.tsx`: Verifies form inputs and API call on submit.
+- `Games.test.tsx`: Tests rendering of game cards and search functionality.
+- `AuthContext.test.tsx`: Ensures auth state persists across components.
+
+---
+
+## ⚠️ Important Notes
+
+1. **CORS**: Ensure the frontend origin is whitelisted in `backend/settings.py` if running on different ports/domains.
 
 ---
 
 ## 🙏 Support
 
-For issues or questions, please contact the development team or open an issue in the repository.
+For any questions, issues, or contributions, please contact the development team or open an issue in the repository. We welcome feedback from the community!
