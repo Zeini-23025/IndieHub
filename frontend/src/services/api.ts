@@ -77,6 +77,7 @@ export interface Review {
   game: number;
   user: number;
   user_username: string;
+  user_profile_image?: string;
   rating: number;
   comment: string;
   created_at: string;

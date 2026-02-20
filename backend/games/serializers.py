@@ -113,11 +113,12 @@ class ReviewSerializer(serializers.ModelSerializer):
     # Expose the review author as a read-only nested object (id + username)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     user_username = serializers.SerializerMethodField(read_only=True)
+    user_profile_image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Review
         fields = [
-            'id', 'game', 'user', 'user_username',
+            'id', 'game', 'user', 'user_username', 'user_profile_image',
             'rating', 'comment',
             'created_at', 'updated_at'
         ]
@@ -126,6 +127,17 @@ class ReviewSerializer(serializers.ModelSerializer):
     def get_user_username(self, obj):
         try:
             return obj.user.username
+        except Exception:
+            return None
+
+    def get_user_profile_image(self, obj):
+        try:
+            if obj.user.profile_image:
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(obj.user.profile_image.url)
+                return obj.user.profile_image.url
+            return None
         except Exception:
             return None
 

@@ -250,7 +250,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     - Authenticated users can create reviews and manage their own reviews.
     - Admins can manage all reviews.
     """
-    queryset = Review.objects.all().order_by('-created_at')
+    queryset = Review.objects.select_related('user').all().order_by('-created_at')
     serializer_class = ReviewSerializer
     permission_classes = [IsOwnerOrAdmin]
 
@@ -262,11 +262,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
             and user.is_authenticated
             and getattr(user, 'role', None) == 'admin'
         ):
-            return Review.objects.all().order_by('-created_at')
+            return Review.objects.select_related('user').all().order_by('-created_at')
 
         # Authenticated users see their own reviews
         if user and user.is_authenticated:
-            return Review.objects.filter(user=user).order_by('-created_at')
+            return Review.objects.select_related('user').filter(user=user).order_by('-created_at')
 
         # Public: no access to write/manage reviews
         return Review.objects.none()
@@ -287,12 +287,12 @@ class ReviewListView(viewsets.ReadOnlyModelViewSet):
     Public read-only view for listing and retrieving reviews.
     Allows filtering by game.
     """
-    queryset = Review.objects.all().order_by('-created_at')
+    queryset = Review.objects.select_related('user').all().order_by('-created_at')
     serializer_class = ReviewSerializer
     permission_classes = []  # Allow any (public)
 
     def get_queryset(self):
-        qs = Review.objects.all().order_by('-created_at')
+        qs = Review.objects.select_related('user').all().order_by('-created_at')
         game_id = self.request.query_params.get('game')
         if game_id:
             qs = qs.filter(game_id=game_id)

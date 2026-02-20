@@ -48,11 +48,61 @@ describe('GameDetail Page', () => {
 
     await waitFor(() => expect(screen.getByText(/Cool Game/i)).toBeInTheDocument());
 
-    const addButton = screen.getByText(/Add to Library/i);
+    const addButton = screen.getByRole('button', { name: /add to library/i });
     fireEvent.click(addButton);
 
     await waitFor(() => {
       expect(mockAdd).toHaveBeenCalled();
     });
+  });
+
+  it('displays user profile image in reviews', async () => {
+    const mockGame = { id: 1, title: 'Cool Game', title_ar: 'لعبة', description: 'desc', description_ar: 'وصف', categories: [], status: 'approved' };
+    const mockReviews = [
+      {
+        id: 1,
+        user: 1,
+        user_username: 'UserWithImage',
+        user_profile_image: 'http://example.com/profile.jpg',
+        rating: 5,
+        comment: 'Great game!',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        user: 2,
+        user_username: 'UserNoImage',
+        rating: 4,
+        comment: 'Good game.',
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    (api.gamesAPI.getGame as any).mockResolvedValue(mockGame);
+    (api.reviewsAPI.getReviews as any).mockResolvedValue(mockReviews);
+    (api.screenshotsAPI.getScreenshots as any).mockResolvedValue([]);
+    (api.libraryAPI.getLibrary as any).mockResolvedValue([]);
+
+    render(
+      <MemoryRouter initialEntries={["/games/1"]}>
+        <LanguageProvider>
+          <AuthProvider>
+            <Routes>
+              <Route path="/games/:id" element={<GameDetail />} />
+            </Routes>
+          </AuthProvider>
+        </LanguageProvider>
+      </MemoryRouter>
+    );
+
+    // Check for profile image
+    await waitFor(() => {
+      const profileImage = screen.getByAltText('UserWithImage');
+      expect(profileImage).toBeInTheDocument();
+      expect(profileImage).toHaveAttribute('src', 'http://example.com/profile.jpg');
+    });
+
+    // Check for initial fallback
+    expect(screen.getByText('U')).toBeInTheDocument(); // First letter of UserNoImage
   });
 });
