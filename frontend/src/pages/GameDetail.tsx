@@ -354,11 +354,19 @@ const GameDetail: React.FC = () => {
             <div key={review.id} className="p-4 bg-bg-tertiary pixel-border rounded-lg">
               <div className="flex justify-between items-start mb-2" dir={language === 'ar' ? 'rtl' : 'ltr'}>
                 <div className="flex items-center gap-3" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                  <div className="w-10 h-10 bg-accent-primary/20 border border-accent-primary/30 rounded-full flex items-center justify-center">
-                    <span className="font-pixel text-xs text-accent-primary-bright">
-                      {review.user_username.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  {review.user_profile_image ? (
+                    <img
+                      src={review.user_profile_image}
+                      alt={review.user_username}
+                      className="w-10 h-10 rounded-full object-cover border border-accent-primary/30"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-accent-primary/20 border border-accent-primary/30 rounded-full flex items-center justify-center">
+                      <span className="font-pixel text-xs text-accent-primary-bright">
+                        {review.user_username.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                   <div>
                     <div className="font-pixel text-xs text-text-primary">{review.user_username}</div>
                     <div className="text-yellow-400 text-sm">
