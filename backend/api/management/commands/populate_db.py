@@ -43,13 +43,36 @@ class Command(BaseCommand):
 
         # Users
         users = []
+        # Profile images directory
+        profiles_dir = os.path.join(os.path.dirname(__file__), 'profiles')
+        profile_images = []
+        if os.path.isdir(profiles_dir):
+            profile_images = [
+                os.path.join(profiles_dir, f) 
+                for f in os.listdir(profiles_dir) 
+                if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+            ]
+
         for i in range(1, 11):
-            user, _ = User.objects.get_or_create(
+            user, created = User.objects.get_or_create(
                 username=f'player{i}',
                 email=f'player{i}@indiehub.com',
                 defaults={'role': 'user'}
             )
             user.set_password(f'player{i}123')
+            
+            if created and profile_images:
+                try:
+                    image_path = random.choice(profile_images)
+                    with open(image_path, 'rb') as f:
+                        user.profile_image.save(
+                            os.path.basename(image_path),
+                            File(f),
+                            save=False
+                        )
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f'Failed to set profile image for {user.username}: {e}'))
+
             user.save()
             users.append(user)
 
