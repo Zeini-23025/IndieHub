@@ -5,5 +5,5 @@ djangorestframework==3.16.1
 pillow==12.0.0
 python-dotenv==1.2.1
 sqlparse==0.5.4
-drf-yasg==1.21.6
+drf-yasg>=1.21.8
 setuptools>=65.0.0
