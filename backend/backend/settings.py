@@ -21,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-e%qw-=8@#5qbkcljuxcqp5_ftq8*r%a-)y2owf+51l&s307^-2"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-e%qw-=8@#5qbkcljuxcqp5_ftq8*r%a-)y2owf+51l&s307^-2")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # Allow hosts via environment variable (comma-separated) or sensible defaults for dev
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")
@@ -76,6 +76,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost:80",
     "http://127.0.0.1:80",
+    # url for frontend during development
+    os.environ.get("FRONTEND_URL", "http://localhost:5173"),
 ]
 
 # During development, allow all origins to simplify local testing. In production
@@ -124,6 +126,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# Database dev settings (SQLite)
 
 DATABASES = {
     "default": {
@@ -131,6 +134,27 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# Database production settings (Postgres)
+
+# If Postgres environment variables are provided (e.g., when running in Docker
+# with a `db` service), prefer Postgres instead of the default sqlite3.
+if os.environ.get("POSTGRES_DB") or os.environ.get("DATABASE_URL"):
+    POSTGRES_DB = os.environ.get("POSTGRES_DB", os.environ.get("DB_NAME", "indiehub"))
+    POSTGRES_USER = os.environ.get("POSTGRES_USER", os.environ.get("DB_USER", "indiehub"))
+    POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", os.environ.get("DB_PASSWORD", "indiehub"))
+    POSTGRES_HOST = os.environ.get("POSTGRES_HOST", os.environ.get("DB_HOST", "db"))
+    POSTGRES_PORT = os.environ.get("POSTGRES_PORT", os.environ.get("DB_PORT", "5432"))
+
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": POSTGRES_DB,
+        "USER": POSTGRES_USER,
+        "PASSWORD": POSTGRES_PASSWORD,
+        "HOST": POSTGRES_HOST,
+        "PORT": POSTGRES_PORT,
+    }
+
 
 CACHES = {
     "default": {
