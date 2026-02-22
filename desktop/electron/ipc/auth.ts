@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api/users'
+const API_BASE_URL = process.env.API_URL || 'http://127.0.0.1:8000/api/users';
 
 async function handleLogin(_event: any, credentials: any) {
     try {
