@@ -5,18 +5,8 @@ services:
     container_name: indiehub_backend
     ports:
       - "8000:8000"
-    depends_on:
-      - db
     environment:
       - PYTHONUNBUFFERED=1
-      - POSTGRES_DB=indiehub
-      - POSTGRES_USER=indiehub
-      - POSTGRES_PASSWORD=indiehub
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-    environment:
-      - PYTHONUNBUFFERED=1
-    # If you use a separate DB service, you can add depends_on here.
 
   frontend:
     build:
